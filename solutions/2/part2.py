@@ -38,7 +38,5 @@ def getPoint(play, result):
     return ( (points[play] + 3) % 3) + 1 + 6
   return 0
 
-
-
 if __name__ == "__main__":
   main()
