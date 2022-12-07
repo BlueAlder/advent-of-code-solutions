@@ -2,7 +2,6 @@
 
 def main():
     current_dir = "/"
-    # count = 0
     dir_sizes = {}
     with open("input.txt", "r") as f:
         for line in f:
@@ -10,18 +9,9 @@ def main():
                 tokens = line.split(' ')
                 if tokens[1] == "cd":
                     current_dir = change_dir(current_dir, tokens[2].strip())
-                elif tokens[1] == "ls":
-
-                    continue
-            
-            # File or Dir
             else:
                 file_toks = line.split(" ")
-
-                if file_toks[0] == "dir":
-                    # Do something with dir
-                    pass
-                else:
+                if file_toks[0] != "dir":
                     file_size = int(file_toks[0])
                     tmp_dir = current_dir
                     while True:
@@ -32,22 +22,23 @@ def main():
                         if tmp_dir == "/":
                             break
                         tmp_dir = pop_dir(tmp_dir)
+    count = 0
+    for idx, (dir, val) in enumerate(dir_sizes.items()):
+        if val < 100000:
+            count += val
+    print("Part 1:", count)
 
     total_space = 70000000
     required_space =  30000000                  
 
     unused_space =  total_space - dir_sizes["/"]
-    print("Unused:", unused_space)
     dir_size_min = required_space - unused_space
-    print("Min Size:", dir_size_min)
-
-
-    closest = 99999999999999999999999
+    closest = total_space
 
     for idx, (dir, val) in enumerate(dir_sizes.items()):
         if val > dir_size_min and val < closest:
             closest = val
-    print(closest)
+    print("Part 2:", closest)
 
 
 def change_dir(current_dir, arg):
@@ -70,5 +61,3 @@ def pop_dir(current_dir):
 
 if __name__ == "__main__":
     main()
-    # a = change_dir("/abc/xyc/asd", "/asdas/asd")
-    # print(a)
