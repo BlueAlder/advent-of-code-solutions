@@ -49,7 +49,7 @@ def playRound(monkeys):
 
 def loadMonkeys():
   monkeys = []
-  with open("/home/sam/Documents/advent-of-code-22/solutions/11/input.txt", "r") as f:
+  with open("input.txt", "r") as f:
     while True:
       f.readline()
       itemstr = f.readline().strip().split(" ")[2::]
