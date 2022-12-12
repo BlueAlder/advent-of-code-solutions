@@ -68,9 +68,30 @@ class Game:
         if node_costs[adjPoint] > new_cost:
           node_costs[adjPoint] = new_cost
           heap.heappush(pq, (new_cost, entry_count, adjPoint))
+  
+  def bfs(self, start_node, destination_node_value):
+    visited = set()
+    queue = []
+    node_steps = defaultdict(lambda: 1e7)
+    node_steps[start_node] = 0
+    queue.append(start_node)
+
+    while queue:
+      node = queue.pop(0)
+      if node.value == destination_node_value: return node_steps[node]
+      visited.add(node)
+
+      for adjPoint in self.availablePoints(node):
+        if adjPoint in visited: continue
+        new_cost = node_steps[node] + 1
+        if new_cost < node_steps[adjPoint]:
+          node_steps[adjPoint] = new_cost
+          queue.append(adjPoint)
+
 
 def main():
   grid = Game()
+  print(grid.bfs(grid.end, 1))
   print(grid.dijkstra(grid.end, 1))
 
 if __name__ == "__main__":
