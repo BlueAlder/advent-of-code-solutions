@@ -37,6 +37,6 @@ func main() {
 	}
 
 	sort.Sort(sort.Reverse(sort.IntSlice(calorie_count)))
-	fmt.Println("Part 1", calorie_count[0])
-	fmt.Println("Part 2", calorie_count[0]+calorie_count[1]+calorie_count[2])
+	fmt.Println("Part 1:", calorie_count[0])
+	fmt.Println("Part 2:", calorie_count[0]+calorie_count[1]+calorie_count[2])
 }
