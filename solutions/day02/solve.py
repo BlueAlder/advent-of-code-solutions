@@ -13,7 +13,8 @@ points = {
   "C": 3,
 }
 
-def main():
+
+def part1(): 
   total = 0
   with open("input.txt", "r") as f:
     for line in f:
@@ -28,10 +29,37 @@ def main():
       elif ( (sum == 3 and play == "Y") or (sum == 4 and play == "X") or (sum == 5 and play == "Z")):
         total += 6
       total += points[play]
-  print(total)
+  return total
 
+def part2():
+  total = 0
+  with open("input.txt", "r") as f:
+    for line in f:
+      strats = line.strip().split(" ")
+      play = strats[0]
+      result = strats[1]
 
+      points = getPoint(play, result)
+      total += points
+  return total
 
+def getPoint(play, result):
+  # Lose
+  if (result == "X"):
+    return ((points[play] - 2) % 3) + 1
+  # Draw
+  elif (result == "Y"):
+    return points[play] + 3
+  # Win
+  elif (result == "Z"):
+    return ( (points[play] + 3) % 3) + 1 + 6
+  return 0
+
+def main():
+  print("Part 1:", part1())
+  print("Part 2:", part2())
+
+  
 
 if __name__ == "__main__":
   main()
