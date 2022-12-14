@@ -62,7 +62,6 @@ func comparePackets(left []any, right []any) bool {
 			}
 			return false
 		}
-
 	}
 }
 
