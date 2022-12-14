@@ -18,8 +18,6 @@ def main():
             
 def isVisible(x, y, grid):
     treeValue = grid[x][y]
-
-
     # LEFT
     found = True
     for xtest in range(x):

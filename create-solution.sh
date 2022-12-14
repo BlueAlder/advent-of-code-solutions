@@ -28,7 +28,7 @@ mkdir $dirname
 
 cd $dirname
 
-cat <<EOF > part1.py
+cat <<EOF > solve.py
 #!/usr/bin/env python3
 # Advent of Code Challenge $1
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
   main()
 EOF
 
-cp part1.py part2.py
-chmod +x part1.py part2.py
+cp solve.py 
+chmod +x solve.py 
 
 touch input.txt
