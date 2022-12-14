@@ -4,11 +4,11 @@
 import itertools
 
 def main():
-  solve("input.txt")
+  solve("/home/sam/Documents/advent-of-code-22/solutions/day14/input.txt")
 
 def parseInput(fileName):
   coords = []
-  with open("input.txt") as f:
+  with open(fileName) as f:
     for line in f:
       rockLine = line.strip().split(" -> ")
       rockLine = list(map(lambda x: (int(x.split(",")[0]), int(x.split(",")[1])), rockLine))
@@ -16,28 +16,59 @@ def parseInput(fileName):
   return coords
   
 def createFlatArrOfCoords(coords):
-  rockPairs = set()
+  rockCoords = set()
   for coord in coords:
     for c1, c2 in list(zip( coord, coord[1:])):
-      for x in range(c1[0], c2[0] + 1):
-        rockPairs.add((x, c1[1]))
-      for y in range(c1[1], c2[1] + 1):
-        rockPairs.add((c1[0], y))
-  return rockPairs
+      for x in range(min(c1[0], c2[0]), max(c1[0], c2[0]) + 1):
+        rockCoords.add((x, c1[1]))
+      for y in range(min(c1[1], c2[1]), max(c1[1], c2[1]) + 1):
+        rockCoords.add((c1[0], y))
+  return rockCoords
 
-def lowestRock(rockPairs):
+def findLowestRock(rockCoords):
   max = 0
-  for x,y in rockPairs:
+  for _,y in rockCoords:
     if y > max: max = y
   return max
 
-def pourSand(starting, rockPairs, lowestRock):
-  pass
+def pourSand(starting, rockCoords, lowestRock):
+  landed = 0 
+  sandPositions = []
+  while True:
+    sandPosition = (starting, 0)
+    while True:
+      nextPosition = getNextSandPosition(sandPosition, rockCoords, sandPositions)
+      if nextPosition == sandPosition: 
+        sandPositions.append(sandPosition)
+        landed += 1
+        break
+      if nextPosition[1] > lowestRock:
+        return landed
+      sandPosition = nextPosition
+
+
+def getNextSandPosition(sandPosition, rockCoords, sandCoords):
+  movements = getAdjPositions(sandPosition)
+  for position in movements:
+    if not (position in rockCoords or position in sandCoords):
+      return position
+  return sandPosition
+
+
+
+def getAdjPositions(sandPosition):
+  movements = [(0, 1), (-1, 1), (1, 1)]
+  positions = []
+  for dx, dy in movements:
+    positions.append((sandPosition[0] + dx, sandPosition[1] + dy))
+  return positions
 
 def solve(fileName):
   coords = parseInput(fileName)
-  rockPairs = createFlatArrOfCoords(coords)
-  lowestRock = lowestRock(rockPairs)
+  rockCoords = createFlatArrOfCoords(coords)
+  lowestRock = findLowestRock(rockCoords)
+  sands = pourSand(500, rockCoords, lowestRock)
+  print(sands)
 
 
   
