@@ -30,8 +30,8 @@ func solve(inputFileName string, part int) int {
 			os.Exit(1)
 		}
 		total += prio
-
 	}
+	return total
 }
 
 func getPriority(rucksack string) (int, error) {
@@ -50,8 +50,9 @@ func getPriorityFromLetter(letter rune) int {
 	if unicode.IsUpper(letter) {
 		return int(letter) - 64 + 26
 	}
+	return int(letter) - 96
 }
 
 func main() {
-	solve("input.txt", 1)
+	fmt.Println(solve("input.txt", 1))
 }
