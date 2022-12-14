@@ -33,13 +33,13 @@ def findLowestRock(rockCoords):
 
 def pourSand(starting, rockCoords, lowestRock):
   landed = 0 
-  sandPositions = []
+  sandPositions = set()
   while True:
     sandPosition = (starting, 0)
     while True:
       nextPosition = getNextSandPosition(sandPosition, rockCoords, sandPositions)
       if nextPosition == sandPosition: 
-        sandPositions.append(sandPosition)
+        sandPositions.add(sandPosition)
         landed += 1
         break
       if nextPosition[1] > lowestRock:
