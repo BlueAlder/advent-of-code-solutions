@@ -39,7 +39,6 @@ if __name__ == "__main__":
   main()
 EOF
 
-cp solve.py 
 chmod +x solve.py 
 
 touch input.txt
