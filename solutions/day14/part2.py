@@ -34,6 +34,22 @@ def findLowestRock(rockCoords):
 def pourSand(starting, rockCoords, lowestRock):
   landed = 0 
   sandPositions = set()
+  # visited = set()
+  # queue = []
+  # queue.append((starting, 0))
+
+  # while queue:
+  #   sandCoord = queue.pop(0)
+  #   visited.add(sandCoord)
+
+  #   for nextPos in getPossibleNextPositions(sandCoord, rockCoords, lowestRock):
+  #     if nextPos in visited: continue
+  #     queue.append(nextPos)
+  # return len(visited)
+
+
+
+
   while True:
     sandPosition = (starting, 0)
     while True:
@@ -55,6 +71,14 @@ def getNextSandPosition(sandPosition, rockCoords, sandCoords, lowestRock):
     if not (position in rockCoords or position in sandCoords or position[1] >= lowestRock + 2 ):
       return position
   return sandPosition
+
+def getPossibleNextPositions(sandPosition, rockCoords, lowestRock):
+  movements = getAdjPositions(sandPosition)
+  positions = []
+  for position in movements:
+    if not (position in rockCoords or position[1] >= lowestRock + 2 ):
+      positions.append(position)
+  return positions
 
 
 
