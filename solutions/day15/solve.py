@@ -23,17 +23,36 @@ def parseInput(inputFilename):
       beacon = (int(tokens[8][2:-1]), int(tokens[9][2:]))
       sensors[sensor] = beacon
   
+  # for k,v in sensors.items():
+  #   print(k, v)
   return sensors
-  for k,v in sensors.items():
-    print(k, v)
 
+def findBeaconless(sensor_map, row_to_check):
+  cannot_go = set()
+  for sensor, beacon in sensor_map.items():
+    md = getMDistance(sensor, beacon)
+    dist_to_row = abs(sensor[1] - row_to_check)
 
-def solve(inputFilename, rowToCheck):
+    if dist_to_row <= md:
+      delta = abs(dist_to_row - md) 
+      startX = sensor[0] - delta 
+      endX = sensor[0] + delta
+      for x in range(startX, endX + 1):
+        p = (x, row_to_check)
+        if not ( p in sensor_map.values()):
+          cannot_go.add(p)
+  
+  # print(cannot_go)
+  print(len(cannot_go)) 
+
+def solve(inputFilename, row_to_check):
   sensor_map = parseInput(inputFilename)
+  findBeaconless(sensor_map, row_to_check)
+  
 
 
 def main():
-  solve("input.txt", 10)
+  solve("input.txt", 2000000)
 
 if __name__ == "__main__":
   main()
