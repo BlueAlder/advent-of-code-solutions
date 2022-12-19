@@ -4,8 +4,6 @@
 import os
 from collections import defaultdict
 import copy
-from itertools import permutations 
-
 
 class Node:
   def __init__(self, id, value, connecting_nodes):
@@ -32,79 +30,29 @@ def getConnectingValves(g, node):
   return next
 
 
-
-# def findNextDestination(g, starting_node_id, minutes, opened=None):
-#   visited = set()
-#   queue = []
-#   node_steps = defaultdict(lambda: 1e7)
-#   node_steps[starting_node_id] = 0
-#   queue.append(starting_node_id)
-
-#   while queue:
-#     curr_position = queue.pop(0)
-#     visited.add(curr_position)
-
-#     for nextPos in getConnectingValves(g, curr_position.id):
-#       if nextPos in visited: continue
-#       new_steps = node_steps[curr_position] + 1
-#       if new_steps < node_steps[nextPos]:
-#         node_steps[nextPos] = new_steps
-#         queue.append(nextPos)
-#   values = {}
-#   max_val = 0
-#   destination = ""
-#   count = 0
-#   for node, step in node_steps.items():
-#     val = node.value * (minutes - step - 1)
-#     if val > 0:
-#       count += 1
-#     if val > max_val: 
-#       max_val = val
-#       destination = node
-#     print(node.id, step ,val)
-#   print(max_val)
-#   print(destination.id)
-#   print(count)
-
-def findMaxGasReleased(starting_point_id,
-                      starting_elephant_point_id,
+def findMaxGasReleased(starting_point_id, 
                       distance_between_valves, 
                       valves, 
-                      valve_pairs,
                       opened_v, 
-                      # pressure_released,
                       minutes_remaining): 
-  #   return 0
   max_gas_released = 0
-  for valve_pair in valve_pairs():
-    [v1id, v2id] = valve_pair
-    if v1id in opened_v or v2id in opened_v:continue
-    v1 = valves[v1id]
-    v2 = valves[v2id]
-    # if starting_point_id == "AA":
-      # print('s')
+  valves_opened = []
+  for valve in valves.values():
+    if valve.id in opened_v: continue
     # 1 Is it possible to go there in the remaining amount of time?
-
     # 2 Can we turn it on and still have time remaining so it will actually do something?
-    d1 = distance_between_valves[starting_point_id + v1.id]
-    d2 = distance_between_valves[starting_elephant_point_id + v2.id]
-    if max(d1, d2) > minutes_remaining + 1: continue
-    pressure = v1.value * (minutes_remaining - d1 - 1) #+ pressure_released
-    pressure = v1.value * (minutes_remaining - d - 1) #+ pressure_released
+    d = distance_between_valves[starting_point_id + valve.id]
+    if d > minutes_remaining + 1: continue
+    pressure = valve.value * (minutes_remaining - d - 1) 
     new_minutes = minutes_remaining - (d + 1)
-    new_opened = copy.copy(opened_v)
-    new_opened.append(valve.id)
-    gas_released = findMaxGasReleased(valve.id, distance_between_valves, valves, valve_pairs, new_opened, new_minutes)
-    if gas_released + pressure > max_gas_released: max_gas_released = gas_released + pressure
+    new_opened_valves = copy.copy(opened_v)
+    new_opened_valves.append(valve.id)
+    gas_released, v = findMaxGasReleased(valve.id, distance_between_valves, valves, new_opened_valves, new_minutes)
+    if gas_released + pressure > max_gas_released: 
+      max_gas_released = gas_released + pressure
+      valves_opened = [valve.id] + v
   
-  # print("gday")
-  # if len(opened_v) == 6 and starting_point_id == "BB":
-      # print('s')
-  return max_gas_released
-
-
-
-
+  return max_gas_released, valves_opened
 
 
 def calcDistanceBetweenValvesAndStartPoint(nodes, valves, start_point):
@@ -137,21 +85,31 @@ def calcDistanceBetweenValvesAndStartPoint(nodes, valves, start_point):
 def solve(filename, starting_node_id, minutes):
   nodes = parseInput(filename)
   valves = dict(filter(lambda  node: node[1].value > 0, nodes.items()))
-  valve_pairs = permutations(valves.keys(), 2)
+  print(len(valves))
   d_between_valves = calcDistanceBetweenValvesAndStartPoint(nodes, valves, starting_node_id)
-  m = findMaxGasReleased(starting_node_id, 
+  m1, v1 = findMaxGasReleased(
+                      starting_node_id, 
                       d_between_valves, 
-                      valves,
-                      valve_pairs, 
+                      valves, 
                       [], 
                       minutes)
-  print("checking")
+  m2, v2 = findMaxGasReleased(
+                      starting_node_id, 
+                      d_between_valves, 
+                      valves, 
+                      v1, 
+                      minutes)
+  print(m1)
+  print(v1)
 
-  
-  print(m)
+  print(m2)
+  print(v2)
+
+  # Honestly have no idea how this works but ok
+  print(m1 + m2)
 
 def main():
-  solve("input.txt", "AA", 30)
+  solve("input.txt", "AA", 26)
 
 if __name__ == "__main__":
   main()
