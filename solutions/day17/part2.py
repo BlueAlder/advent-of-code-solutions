@@ -63,8 +63,10 @@ def printTower(width, max_height, rocks):
 
 def solve(filename, rocks_to_fall, chamber_width):
   wind = parseInput(filename)
-  current_wind_index = 0
+  current_wind_index = -1
   highest_position = 0
+  patterns = {}
+
   # Floor will be at y = 0
   # wall will be at x = 0 and x = 8
   rock_coords = set()
@@ -72,15 +74,34 @@ def solve(filename, rocks_to_fall, chamber_width):
     rock = getNextRockCoords(rock_index, highest_position)
     placed = False
     while not placed:
+      current_wind_index = (current_wind_index + 1) % len(wind)
       rock = pushRock(wind[current_wind_index], rock, rock_coords, chamber_width)
       [rock, placed] = dropRock(rock, rock_coords)
-      current_wind_index = (current_wind_index + 1) % len(wind)
-      if placed:
-        rock_coords = rock_coords.union(rock)
-        nhp = max(map(lambda x: x[1], rock))
-        if nhp > highest_position: highest_position = nhp
-        # printTower(chamber_width, highest_position, rock_coords)
-    
+
+    # Check for same rock index and wind direction
+    rock_coords = rock_coords.union(rock)
+    nhp = max(map(lambda x: x[1], rock))
+    if nhp > highest_position: highest_position = nhp
+    key = str((rock_index) % 5) + "-" + str(current_wind_index)
+    if key in patterns.keys():
+        # we have found a pattern
+        print("Initially found with rocks fallen:", patterns[key][0])
+        print("Initially found at height:", patterns[key][1])
+        print("Current Rocks Fallen:", rock_index + 1)
+        print("Current Height:", highest_position)
+        cycle_height = highest_position - patterns[key][1]
+        cycle_rocks = (rock_index - patterns[key][0])
+        num_cycles = (rocks_to_fall - patterns[key][0]) // cycle_rocks
+        print(cycle_height, cycle_rocks, num_cycles)
+
+        ans = patterns[key][1] + (num_cycles * cycle_height) # + remaining 
+        ans_rocks = patterns[key][0] + (num_cycles * cycle_rocks)
+        print(ans, ans_rocks)
+
+
+        return
+    else:
+        patterns[key] = (rock_index + 1, highest_position)
 
   print(highest_position)
 
@@ -91,7 +112,7 @@ def solve(filename, rocks_to_fall, chamber_width):
 
 
 def main():
-  solve("input.txt", 2022, 7)
+  solve("input.txt", 1000000000000, 7)
 
 if __name__ == "__main__":
   main()
