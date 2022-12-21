@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # Advent of Code Challenge 17
 import os
-from tqdm import tqdm
 
 
 def parseInput(filename):
@@ -69,23 +68,19 @@ def solve(filename, rocks_to_fall, chamber_width):
   # Floor will be at y = 0
   # wall will be at x = 0 and x = 8
   rock_coords = set()
-  for rock_index in tqdm(range(rocks_to_fall)):
+  for rock_index in range(rocks_to_fall):
     rock = getNextRockCoords(rock_index, highest_position)
-    # print("Rock", str(rock_index + 1) + ":", rock)
     placed = False
     while not placed:
       rock = pushRock(wind[current_wind_index], rock, rock_coords, chamber_width)
-      # print("Rock", str(rock_index + 1) + ":", rock)
       [rock, placed] = dropRock(rock, rock_coords)
-      # print("Rock", str(rock_index + 1) + ":", rock)
-
-      # might be bug with wind index
       current_wind_index = (current_wind_index + 1) % len(wind)
       if placed:
         rock_coords = rock_coords.union(rock)
         nhp = max(map(lambda x: x[1], rock))
         if nhp > highest_position: highest_position = nhp
         # printTower(chamber_width, highest_position, rock_coords)
+    
 
   print(highest_position)
 
