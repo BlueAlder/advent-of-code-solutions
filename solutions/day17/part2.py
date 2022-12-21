@@ -2,7 +2,6 @@
 # Advent of Code Challenge 17
 import os
 
-
 def parseInput(filename):
   wind = []
   with open(os.path.join(os.path.dirname(__file__), filename)) as f:
@@ -78,34 +77,13 @@ class RockTower:
       self.dropRock(rock)
       self.rocks_dropped += 1
   
-  def testFlatPlatform(self):
-    test = []
-    for i in range(self.chamber_width):
-        test.append((i + 1, self.highest_position))
-    return all(x in self.rock_placements for x in test)
-    
-  def lastNRows(self, n):
-    # self.printTower(15)
-    positions = 0
-    for i in range(n):
-      y = self.highest_position - i
-      for x in range(self.chamber_width):
-        positions = positions << 1
-        if (x + 1, y) in self.rock_placements:
-          positions |= 1
-    # print(bin(positions))
-    return positions
-  
   def distanceToNextRock(self):
     dist = []
-    # self.printTower(10)
-
     for x in range(1, self.chamber_width + 1):
       for y in range(self.highest_position, -1, -1):
         if (x, y) in self.rock_placements or y == 0 :
           dist.append(self.highest_position - y)
           break
-    # print(dist)
     return dist
 
 
@@ -164,7 +142,6 @@ def solve(filename, rocks_to_fall, chamber_width, part):
   
 
 def main():
-  # solve("input.txt", 1000000000000, 7)
   solve("input.txt", 2022, 7, 1)
   solve("input.txt", 1000000000000, 7, 2)
 
