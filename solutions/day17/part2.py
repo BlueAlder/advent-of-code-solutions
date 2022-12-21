@@ -19,100 +19,154 @@ rock_shapes = [
   [(3, 0), (3, 1), (4, 0), (4, 1)],
 ]
 
-def getNextRockCoords(rock_index, highest_position):
-  shape = rock_shapes[rock_index % len(rock_shapes)]
-  return list(map(lambda x: (x[0], x[1] + highest_position + 3 + 1), shape))
+class RockTower:
+  def __init__(self, chamber_width, wind_directions):
+    self.chamber_width = chamber_width  
+    self.wind_directions = wind_directions
+    self.wind_index = -1
+    self.rocks_dropped = 0
+    self.patterns = {}
+    self.highest_position = 0
+    self.rock_placements = set()
 
-def pushRock(direction, rock, rocks, chamber_width):
-  new_position = []
-  for x, y in rock:
-    nx = x + direction
-    if nx < 1 or nx > chamber_width or (nx, y) in rocks:
-      return rock
-    new_position.append((nx, y))
-  return new_position
-
-def dropRock(rock, rocks):
-  new_position = []
-  for x, y in rock:
-    ny = y - 1
-    if ny == 0 or (x, ny) in rocks:
-      return rock, True
-    new_position.append((x, ny))
-  return new_position, False
+  def getNextRockCoords(self):
+    shape = rock_shapes[self.rocks_dropped % len(rock_shapes)]
+    return list(map(lambda x: (x[0], x[1] + self.highest_position + 3 + 1), shape))
   
-def printTower(width, max_height, rocks):
-  print()
-  for y in range(max_height, -1, -1):
-    line = "|"
-    if y == 0:
-      line = "|" + ("+" * width) + "|"
+  def moveRockHorizontally(self, rock):
+    new_position = []
+    for x, y in rock:
+      nx = x + self.wind_directions[self.wind_index]
+      if nx < 1 or nx > self.chamber_width or (nx, y) in self.rock_placements:
+        return rock
+      new_position.append((nx, y))
+    return new_position
+  
+  def moveRockVertically(self, rock):
+    new_position = []
+    for x, y in rock:
+      ny = y - 1
+      if ny == 0 or (x, ny) in self.rock_placements:
+        return rock, True
+      new_position.append((x, ny))
+    return new_position, False
+  
+
+  def printTower(self, lines_to_print=int(10000000000)):
+    print()
+    for y in range(self.highest_position, -1, -1):
+      line = "|"
+      if y == 0:
+        line = "|" + ("+" * self.chamber_width) + "|"
+        print(line)
+        continue
+      for x in range (self.chamber_width):
+        if (x + 1, y) in self.rock_placements:
+          line += "#"
+        else:
+          line += "·"
+      line += "|"
       print(line)
-      continue
-    for x in range (width):
-      if (x + 1, y) in rocks:
-        line += "#"
-      else:
-        line += "."
-    line += "|"
-    print(line)
-  print()
-  print()
+      if self.highest_position - y > lines_to_print:
+        break
+    print()
+    print()
+  
+  def dropRocks(self, num_rocks: int):
+    while self.rocks_dropped < num_rocks:
+      rock = self.getNextRockCoords()
+      self.dropRock(rock)
+      self.rocks_dropped += 1
+  
+  def testFlatPlatform(self):
+    test = []
+    for i in range(self.chamber_width):
+        test.append((i + 1, self.highest_position))
+    return all(x in self.rock_placements for x in test)
+    
+  def lastNRows(self, n):
+    # self.printTower(15)
+    positions = 0
+    for i in range(n):
+      y = self.highest_position - i
+      for x in range(self.chamber_width):
+        positions = positions << 1
+        if (x + 1, y) in self.rock_placements:
+          positions |= 1
+    # print(bin(positions))
+    return positions
+  
+  def distanceToNextRock(self):
+    dist = []
+    # self.printTower(10)
+
+    for x in range(1, self.chamber_width + 1):
+      for y in range(self.highest_position, -1, -1):
+        if (x, y) in self.rock_placements or y == 0 :
+          dist.append(self.highest_position - y)
+          break
+    # print(dist)
+    return dist
 
 
+  def dropUntilPatternFound(self, max_rocks):
+    while True:
+      rock = self.getNextRockCoords()
+      self.dropRock(rock)
+      self.rocks_dropped += 1
+      if self.rocks_dropped % 10000 == 0:
+        print(self.rocks_dropped)
 
-def solve(filename, rocks_to_fall, chamber_width):
-  wind = parseInput(filename)
-  current_wind_index = -1
-  highest_position = 0
-  patterns = {}
+      key = str(self.rocks_dropped % 5) + "-" + str(self.wind_index) + "-" + ''.join(str(x) for x in self.distanceToNextRock())
+      if key in self.patterns.keys():
+        print("Initially found cycle with rocks fallen:", self.patterns[key][0])
+        print("Initially found cycle at height:", self.patterns[key][1])
+        print("Current Rocks Fallen:", self.rocks_dropped)
+        print("Current Height:", self.highest_position)
+        
+        cycle_height = self.highest_position - self.patterns[key][1]
+        cycle_rocks = (self.rocks_dropped  - self.patterns[key][0])
+        num_cycles = (max_rocks - self.patterns[key][0]) // cycle_rocks
+        
+        ans_rocks = self.patterns[key][0] + (num_cycles * cycle_rocks)
+        remaining_rocks = max_rocks - ans_rocks
 
-  # Floor will be at y = 0
-  # wall will be at x = 0 and x = 8
-  rock_coords = set()
-  for rock_index in range(rocks_to_fall):
-    rock = getNextRockCoords(rock_index, highest_position)
+        print("Remaining rocks:", remaining_rocks)
+        self.rocks_dropped = ans_rocks
+        self.dropRocks(max_rocks)
+
+        final_answer = self.patterns[key][1] + (num_cycles * cycle_height) + (self.highest_position - self.patterns[key][1] - cycle_height)
+        print("Part 2:", final_answer)
+        return
+      
+      self.patterns[key] = (self.rocks_dropped, self.highest_position)
+
+  def dropRock(self, rock):
     placed = False
     while not placed:
-      current_wind_index = (current_wind_index + 1) % len(wind)
-      rock = pushRock(wind[current_wind_index], rock, rock_coords, chamber_width)
-      [rock, placed] = dropRock(rock, rock_coords)
-
-    # Check for same rock index and wind direction
-    rock_coords = rock_coords.union(rock)
+      self.wind_index = (self.wind_index + 1) % len(self.wind_directions)
+      rock = self.moveRockHorizontally(rock)
+      [rock, placed] = self.moveRockVertically(rock)
+    self.rock_placements = self.rock_placements.union(rock)
     nhp = max(map(lambda x: x[1], rock))
-    if nhp > highest_position: highest_position = nhp
-    key = str((rock_index) % 5) + "-" + str(current_wind_index)
-    if key in patterns.keys():
-        # we have found a pattern
-        print("Initially found with rocks fallen:", patterns[key][0])
-        print("Initially found at height:", patterns[key][1])
-        print("Current Rocks Fallen:", rock_index + 1)
-        print("Current Height:", highest_position)
-        cycle_height = highest_position - patterns[key][1]
-        cycle_rocks = (rock_index - patterns[key][0])
-        num_cycles = (rocks_to_fall - patterns[key][0]) // cycle_rocks
-        print(cycle_height, cycle_rocks, num_cycles)
-
-        ans = patterns[key][1] + (num_cycles * cycle_height) # + remaining 
-        ans_rocks = patterns[key][0] + (num_cycles * cycle_rocks)
-        print(ans, ans_rocks)
+    if nhp > self.highest_position: self.highest_position = nhp
 
 
-        return
-    else:
-        patterns[key] = (rock_index + 1, highest_position)
-
-  print(highest_position)
-
-    # break
-
-    
+def solve(filename, rocks_to_fall, chamber_width, part):
+  wind = parseInput(filename)
+  tower = RockTower(chamber_width, wind)
+  if part == 1:
+    tower.dropRocks(rocks_to_fall)
+    print("Part 1:", tower.highest_position)
+    print()
+  elif part == 2:
+    tower.dropUntilPatternFound(rocks_to_fall)
   
 
-
 def main():
-  solve("input.txt", 1000000000000, 7)
+  # solve("input.txt", 1000000000000, 7)
+  solve("input.txt", 2022, 7, 1)
+  solve("input.txt", 1000000000000, 7, 2)
 
 if __name__ == "__main__":
   main()
