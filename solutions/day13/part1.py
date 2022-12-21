@@ -3,7 +3,7 @@
 import itertools
 
 def main():
-    with open("/usr/local/google/home/samcalamos/Documents/personal/advent-of-code-22/solutions/13/input.txt", "r") as f:
+    with open("input.txt", "r") as f:
         input = f.read()
     pairs = input.split("\n\n")
 
