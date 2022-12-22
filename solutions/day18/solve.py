@@ -29,7 +29,22 @@ def getAdjacentPoints(point):
     adjPoints.append((point[0] + dx, point[1] + dy, point[2] + dz))
   return adjPoints
 
-def findSurfaceArea(points):
+def checkInAirPocket(point, points, minZ, maxZ):
+  stack = [point]
+  visted = set()
+  while stack:
+    p = stack.pop()
+    visted.add(p)
+    if p[2] > maxZ or p[2] < minZ:
+      return False
+    aPs = getAdjacentPoints(p)
+    for ap in aPs:
+      if ap not in points and ap not in visted:
+        stack.append(ap)
+  return True
+
+
+def findSurfaceArea(points, part):
   min, max = getMinAndMaxZValue(points)
   surfaceArea = 0
   for z in range(min, max + 1):
@@ -39,14 +54,19 @@ def findSurfaceArea(points):
       adjPoints = getAdjacentPoints(point)
       for aPoint in adjPoints:
         if aPoint not in points:
-          surfaceArea += 1
+          if part == 1 or (part == 2 and not checkInAirPocket(aPoint, points, min, max)): surfaceArea += 1 
+            
+
   return surfaceArea
 
 
 def solve(filename):
   points = parseInput(filename)
-  sa = findSurfaceArea(points)
-  print(sa)
+  sa = findSurfaceArea(points, 1)
+  print("Part 1:", sa)
+  sa = findSurfaceArea(points, 2)
+  print("Part 2:", sa)
+
 
 def main():
   solve("input.txt")
