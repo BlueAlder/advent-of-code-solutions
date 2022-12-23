@@ -32,6 +32,15 @@ cat <<EOF > solve.py
 #!/usr/bin/env python3
 # Advent of Code Challenge $1
 
+import os
+
+def parseInput(filename):
+  with open(os.path.join(os.path.dirname(__file__), filename)) as f:
+    pass
+
+def solve(filename):
+  pass
+
 def main():
   pass
 

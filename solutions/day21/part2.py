@@ -3,9 +3,10 @@
 
 import os
 
+known = {}
+unknown = {}
+
 def parseInput(filename):
-  known = {}
-  unknown = {}
   with open(os.path.join(os.path.dirname(__file__), filename)) as f:
     for line in f:
       toks = line.strip().split(" ")
@@ -14,35 +15,24 @@ def parseInput(filename):
         unknown[monke] = [*toks[1:]]
       elif len(toks) == 2:
         known[monke] = int(toks[1])
-  return known, unknown
 
-def doOperation(a, b, op):
+def doOperation(a, b, op, invert=False):
   if op == "+":
-    return a + b
+    return a + b if invert == False else a - b
   elif op == "-":
-    return a - b
+    return a - b if invert == False else a + b
   elif op == "*":
-    return a * b
+    return a * b if invert == False else int(a / b)
   elif op == "/":
-    return int(a / b)
+    return int(a / b) if invert == False else a * b
   raise "bruh moment"
 
-def doInvertOperation(a, b, op):
-  if op == "+":
-    return a - b
-  elif op == "-":
-    return a + b
-  elif op == "*":
-    return int(a / b)
-  elif op == "/":
-    return a * b
-  raise "bruh moment"
 
-def findValue(monke, known, unknown):
+def findValue(monke):
   if monke == "humn": return 
   if monke in known.keys(): return known[monke]
-  m1 = findValue(unknown[monke][0], known, unknown)
-  m2 = findValue(unknown[monke][2], known, unknown)
+  m1 = findValue(unknown[monke][0])
+  m2 = findValue(unknown[monke][2])
   if m1 != None: known[unknown[monke][0]] = m1
   if m2 != None: known[unknown[monke][2]] = m2
   if None in [m1, m2]: return
@@ -50,43 +40,38 @@ def findValue(monke, known, unknown):
   return doOperation(m1, m2, unknown[monke][1])
 
 def solve(filename, monke):
-  known, unknown = parseInput(filename)
+  parseInput(filename)
+  
   m1 = unknown[monke][0]
   m2 = unknown[monke][2]
-  s1 = findValue(m1, known, unknown) 
-  s2 = findValue(m2, known, unknown)
+  s1 = findValue(m1) 
+  s2 = findValue(m2)
 
   m = m1 if s1 == None else m2
-  val = s1 if s2 == None else s2
-  # v1 = findValue(unknown[monke][0], known, unknown)
-  # v2 = findValue(unknown[monke][2], known, unknown)
-  # m, val = unknown[monke][0], v1 if v1 != None else unknown[monke][2], v2
+  desired_value = s1 if s2 == None else s2
 
   while True:
     m1 = unknown[m][0]
     m2 = unknown[m][2]
-    s1 = findValue(m1, known, unknown) 
-    s2 = findValue(m2, known, unknown)
+    s1 = findValue(m1) 
+    s2 = findValue(m2)
 
-    if s1 == None: s1 = val
-    if s2 == None: s2 = val
+    op = unknown[m][1]
+    if s1:
+      if op in ["-", "/"]:
+        desired_value = doOperation(s1, desired_value, op)
+      else:
+        desired_value =  doOperation(desired_value, s1, op, True)
+    else:
+      desired_value = doOperation(desired_value, s2, op, True)
 
-    
-    val = doInvertOperation(s1, s2, unknown[m][1])
-    if m2 == "jmws": 
-      print("hi")
     m = m1 if s1 == None else m2
     if m == "humn":
-      print(val)
-      break
-
-    
-
-
-  # res = findValue(monke, known, unknown)
+      return desired_value
 
 def main():
-  solve("input.txt", "root")
+  p2 = solve("input.txt", "root")
+  print("Part 2:", p2)
 
 if __name__ == "__main__":
   main()
