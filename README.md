@@ -27,5 +27,5 @@ This contains my solutions to the advent of code 2022.
 | [Day 18](https://adventofcode.com/2022/day/18) | ⭐ | ⭐ |
 | [Day 20](https://adventofcode.com/2022/day/20) | ⭐ | ⭐ |
 | [Day 21](https://adventofcode.com/2022/day/21) | ⭐ | ⭐ |
-| [Day 22](https://adventofcode.com/2022/day/22) | ⭐ |   |
+| [Day 22](https://adventofcode.com/2022/day/22) | ⭐ | ⭐ |
 <!--- advent_readme_stars table --->
