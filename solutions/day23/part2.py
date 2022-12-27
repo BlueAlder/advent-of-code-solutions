@@ -64,6 +64,7 @@ def getEmptyNumberTiles():
 def playRound(round_number):
   elfPositions = set()
   proposals = defaultdict(lambda: 0)
+  moved = False
   for elf in elves:
     elfPositions.add((elf.x, elf.y))
   
@@ -81,23 +82,22 @@ def playRound(round_number):
   for i, elf in enumerate(elves):
     if proposals[elf.proposal] == 1:
       elf.moveToProposal()
+      moved = True
     elf.proposal = None
-    # print(i, elf)
+  return moved
 
-
-    
-    
-
-
-def solve(filename, rounds):
+def solve(filename):
   parseInput(filename)
-  for i in range(rounds):
-    playRound(i)
-  return getEmptyNumberTiles()
+
+  rounds = 0
+  while playRound(rounds):
+    rounds += 1
+    
+  return rounds + 1
   
 def main():
-  p1 = solve("input.txt", 10)
-  print("Part 1:", p1)
+  p2 = solve("input.txt")
+  print("Part 2:", p2)
 
 if __name__ == "__main__":
   main()
