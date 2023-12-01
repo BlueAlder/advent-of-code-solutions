@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	util "github.com/BlueAlder/advent-of-code-solutions/utils"
 )
 
 //go:embed input.txt
@@ -20,14 +22,12 @@ func Solve() {
 	fmt.Printf("Part 2: %d\n", part2)
 }
 
-var DIGIT_WORDS = []string{"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
-
 func isAsciiNumber[K rune | byte](c K) bool {
 	return c >= 48 && c <= 57
 }
 
-func startsWithDigitWord(str string) int {
-	for idx, word := range DIGIT_WORDS {
+func startsWithDigitWord(str string, words []string) int {
+	for idx, word := range words {
 		if strings.HasPrefix(str, word) {
 			return idx
 		}
@@ -35,54 +35,41 @@ func startsWithDigitWord(str string) int {
 	return -1
 }
 
-func endsWithDigitWord(str string) int {
-	for idx, word := range DIGIT_WORDS {
-		if strings.HasSuffix(str, word) {
-			return idx
-		}
-	}
-	return -1
-}
-
-func calculateCalibration(part2 bool) (total int) {
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	for scanner.Scan() {
-		line := scanner.Text()
-		val := ""
-
-		// Starting number
-		for idx, c := range line {
-			if isAsciiNumber(c) {
-				val = string(c)
-				break
-			}
-
-			if part2 {
-				if dig := startsWithDigitWord(line[idx:]); dig != -1 {
-					val = strconv.Itoa(dig)
-					break
-				}
-			}
+func getFirstDigit(line string, digitWords []string, part2 bool) (val string) {
+	for idx, c := range line {
+		if isAsciiNumber(c) {
+			val = string(c)
+			return
 		}
 
-		// Last number
-		for i := len(line) - 1; i >= 0; i-- {
-			c := line[i]
-			if isAsciiNumber(c) {
-				val += string(c)
-				break
-			}
-
-			if part2 {
-				if dig := endsWithDigitWord(line[:i+1]); dig != -1 {
-					val += strconv.Itoa(dig)
-					break
-				}
+		if part2 {
+			if dig := startsWithDigitWord(line[idx:], digitWords); dig != -1 {
+				val = strconv.Itoa(dig)
+				return
 			}
 		}
-
-		parsedVal, _ := strconv.Atoi(val)
-		total += parsedVal
 	}
 	return
+}
+
+func calculateCalibration(part2 bool) int {
+	var DIGIT_WORDS = []string{"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
+	total := 0
+
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	for scanner.Scan() {
+		// Get first digit from line
+		line := scanner.Text()
+		val1 := getFirstDigit(line, DIGIT_WORDS, part2)
+
+		// Reverse line and word digits and check again for the other side
+		rev := util.ReverseString(line)
+		revd_digits := util.MapSlice(DIGIT_WORDS, util.ReverseString)
+		val2 := getFirstDigit(rev, revd_digits, part2)
+
+		// Add and total
+		parsedVal, _ := strconv.Atoi(val1 + val2)
+		total += parsedVal
+	}
+	return total
 }

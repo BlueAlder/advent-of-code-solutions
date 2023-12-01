@@ -13,3 +13,19 @@ func OpenFile(filename string) (*os.File, error) {
 	}
 	return file, nil
 }
+
+func ReverseString(input string) (result string) {
+	for _, v := range input {
+		result = string(v) + result
+
+	}
+	return
+}
+
+func MapSlice[T, U any](slice []T, f func(T) U) []U {
+	mapped := make([]U, len(slice))
+	for i := range slice {
+		mapped[i] = f(slice[i])
+	}
+	return mapped
+}
