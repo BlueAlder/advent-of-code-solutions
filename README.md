@@ -1,6 +1,6 @@
-# Advent of Code 2022 Solutions
+# Advent of Code Solutions
 
-This contains my solutions to the advent of code 2022.
+This contains my solutions to the advent of code.
 
 <!--- advent_readme_stars table --->
 ## 2022 Results
