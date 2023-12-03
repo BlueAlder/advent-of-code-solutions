@@ -3,7 +3,6 @@ package day03
 
 import (
 	_ "embed"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,11 +13,8 @@ import (
 //go:embed input.txt
 var input string
 
-func Solve() {
-	ans1 := part1()
-	ans2 := part2()
-	fmt.Printf("Part 1: %d\n", ans1)
-	fmt.Printf("Part 2: %d\n", ans2)
+func Solve() (int, int) {
+	return part1(), part2()
 }
 
 type Set map[int]struct{}

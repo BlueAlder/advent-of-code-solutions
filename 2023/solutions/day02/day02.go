@@ -4,7 +4,6 @@ package day02
 import (
 	"bufio"
 	_ "embed"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -14,11 +13,11 @@ import (
 //go:embed input.txt
 var input string
 
-func Solve() {
-	part1()
+func Solve() (int, int) {
+	return solve()
 }
 
-func part1() {
+func solve() (int, int) {
 	max := map[string]int{
 		"red":   12,
 		"blue":  14,
@@ -44,8 +43,7 @@ func part1() {
 		}
 		powerTotal += power
 	}
-	fmt.Printf("Part 1: %d\n", total)
-	fmt.Printf("Part 2: %d\n", powerTotal)
+	return total, powerTotal
 }
 
 func extractGameID(line string) (int, error) {

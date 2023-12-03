@@ -12,7 +12,7 @@ var (
 
 // logFatal prints a message in red and then runs os.Exit(1)
 func LogFatal(s string, a ...any) {
-	fmt.Printf(colorRed+s, a...)
+	fmt.Printf(colorRed+s+"\n", a...)
 	os.Exit(1)
 }
 

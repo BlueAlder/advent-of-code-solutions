@@ -17,10 +17,12 @@ var slns = map[int]interface{}{
 
 func Run(day int) {
 	fmt.Printf("Running solution for day %d\n", day)
-	if v, ext := slns[day]; ext {
-		v.(func())()
-		return
+	v, ext := slns[day]
+	if !ext {
+		util.LogFatal("day does not exist in function map")
 	}
+	p1, p2 := v.(func() (int, int))()
+	fmt.Printf("Part 1: %d\n", p1)
+	fmt.Printf("Part 2: %d\n", p2)
 
-	util.LogFatal("day does not exist in function map")
 }

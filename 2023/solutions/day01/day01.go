@@ -4,7 +4,6 @@ package day01
 import (
 	"bufio"
 	_ "embed"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -14,12 +13,8 @@ import (
 //go:embed input.txt
 var input string
 
-func Solve() {
-	part1 := calculateCalibration(false)
-	part2 := calculateCalibration(true)
-
-	fmt.Printf("Part 1: %d\n", part1)
-	fmt.Printf("Part 2: %d\n", part2)
+func Solve() (int, int) {
+	return calculateCalibration(false), calculateCalibration(true)
 }
 
 func isAsciiNumber[K rune | byte](c K) bool {
