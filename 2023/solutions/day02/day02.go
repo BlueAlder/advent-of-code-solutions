@@ -35,17 +35,12 @@ func part1() {
 			util.LogFatal("unable to extract game id")
 		}
 
-		possible, err := checkGamePossible(line, max)
+		possible, power, err := checkGamePossible(line, max)
 		if err != nil {
 			util.LogFatal("invalid game: %s", line)
 		}
 		if possible {
 			total += id
-		}
-
-		power, err := calcPowerGame(line)
-		if err != nil {
-			util.LogFatal("invalid game: %s", line)
 		}
 		powerTotal += power
 	}
@@ -59,7 +54,9 @@ func extractGameID(line string) (int, error) {
 	return strconv.Atoi(id)
 }
 
-func checkGamePossible(line string, max map[string]int) (bool, error) {
+func checkGamePossible(line string, max map[string]int) (possible bool, power int, err error) {
+	possible = true
+	minCubes := map[string]int{"blue": 0, "green": 0, "red": 0}
 
 	gamesLine := strings.SplitAfter(line, ": ")[1]
 	games := strings.Split(gamesLine, "; ")
@@ -68,30 +65,13 @@ func checkGamePossible(line string, max map[string]int) (bool, error) {
 		for _, pull := range pulls {
 			vals := strings.Split(pull, " ")
 			num, err := strconv.Atoi(vals[0])
+
 			if err != nil {
-				return false, err
+				return false, 0, err
 			}
 			val, exists := max[vals[1]]
 			if !exists || val < num {
-				return false, nil
-			}
-		}
-	}
-	return true, nil
-}
-
-func calcPowerGame(line string) (int, error) {
-	// Assume blue, green, red are the only cubes
-	minCubes := map[string]int{"blue": 0, "green": 0, "red": 0}
-	gamesLine := strings.SplitAfter(line, ": ")[1]
-	games := strings.Split(gamesLine, "; ")
-	for _, game := range games {
-		pulls := strings.Split(game, ", ")
-		for _, pull := range pulls {
-			vals := strings.Split(pull, " ")
-			num, err := strconv.Atoi(vals[0])
-			if err != nil {
-				return 0, err
+				possible = false
 			}
 
 			if currMax := minCubes[vals[1]]; currMax < num {
@@ -99,5 +79,6 @@ func calcPowerGame(line string) (int, error) {
 			}
 		}
 	}
-	return minCubes["blue"] * minCubes["green"] * minCubes["red"], nil
+	power = minCubes["blue"] * minCubes["green"] * minCubes["red"]
+	return
 }
