@@ -15,7 +15,6 @@ import (
 var input string
 
 func Solve(part int) int {
-	// panic("unimplemented")
 	if part == 1 {
 		return part1()
 	} else if part == 2 {
@@ -32,7 +31,7 @@ func part1() (total int) {
 	for _, card := range cards {
 		winning, picked := getWinningAndPickedNumbers(card)
 		matches := calcCardMatches(winning, picked)
-		value := util.PowInt(2, matches-1)
+		value := 1 << matches >> 1
 		total += value
 	}
 	return
@@ -40,7 +39,7 @@ func part1() (total int) {
 
 func part2() (total int) {
 	cards := strings.Split(input, "\n")
-	cardCount := make(map[int]int)
+	cardCount := make([]int, len(cards))
 
 	for idx, card := range cards {
 		winning, picked := getWinningAndPickedNumbers(card)
@@ -54,7 +53,6 @@ func part2() (total int) {
 	for _, v := range cardCount {
 		total += v
 	}
-
 	return
 }
 
@@ -78,5 +76,4 @@ func getWinningAndPickedNumbers(line string) ([]int, []int) {
 	picked, _ := util.MapSliceWithError(pickedStr, strconv.Atoi)
 
 	return winning, picked
-
 }
