@@ -13,8 +13,16 @@ import (
 //go:embed input.txt
 var input string
 
-func Solve() (int, int) {
-	return solve()
+func Solve(part int) int {
+	p1, p2 := solve()
+	if part == 1 {
+		return p1
+	} else if part == 2 {
+		return p2
+	} else {
+		util.LogFatal("invalid part")
+		return -1
+	}
 }
 
 func solve() (int, int) {

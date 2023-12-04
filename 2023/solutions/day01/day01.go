@@ -13,8 +13,15 @@ import (
 //go:embed input.txt
 var input string
 
-func Solve() (int, int) {
-	return calculateCalibration(false), calculateCalibration(true)
+func Solve(part int) int {
+	if part == 1 {
+		return calculateCalibration(false)
+	} else if part == 2 {
+		return calculateCalibration(true)
+	} else {
+		util.LogFatal("invalid part")
+		return -1
+	}
 }
 
 func isAsciiNumber[K rune | byte](c K) bool {

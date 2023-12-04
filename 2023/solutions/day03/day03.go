@@ -13,8 +13,15 @@ import (
 //go:embed input.txt
 var input string
 
-func Solve() (int, int) {
-	return part1(), part2()
+func Solve(part int) int {
+	if part == 1 {
+		return part1()
+	} else if part == 2 {
+		return part2()
+	} else {
+		util.LogFatal("invalid part number")
+		return -1
+	}
 }
 
 type Set map[int]struct{}

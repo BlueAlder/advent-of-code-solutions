@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"math"
 	"os"
 )
 
@@ -24,4 +25,8 @@ func ReverseString(input string) (result string) {
 
 func IsAsciiNumber[K rune | byte](c K) bool {
 	return c >= 48 && c <= 57
+}
+
+func PowInt(x, y int) int {
+	return int(math.Pow(float64(x), float64(y)))
 }

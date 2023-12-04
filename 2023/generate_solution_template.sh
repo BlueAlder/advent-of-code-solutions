@@ -34,13 +34,23 @@ package $daynum
 
 import (
 	_ "embed"
+
+  util "github.com/BlueAlder/advent-of-code-solutions/utils"
 )
 
 //go:embed input.txt
 var input string
 
-func Solve() {
-	panic("Day $1 not implemented")
+func Solve(part int) int {
+	panic("unimplemented")
+	// if part == 1 {
+	// 	return part1()
+	// } else if part == 2 {
+	// 	return part2()
+	// } else {
+	// 	util.LogFatal("invalid part number")
+	// 	return -1
+	// }
 }
 EOF
 
