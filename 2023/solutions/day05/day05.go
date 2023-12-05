@@ -3,7 +3,8 @@ package day05
 
 import (
 	_ "embed"
-	"fmt"
+	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -33,14 +34,11 @@ type Mapping struct {
 func part1() int {
 	parts := strings.Split(input, "\n\n")
 	seeds, _ := util.MapSliceWithError(strings.Split(parts[0], " ")[1:], strconv.Atoi)
-	fmt.Printf("Seeds: %v", seeds)
 
 	mappingSet := util.MapSlice(parts[1:], convertTextMap)
 
-	fmt.Printf("%v\n", mappingSet)
 	locations := make([]int, len(seeds))
 	for seedIdx, seed := range seeds {
-		// fmt.Printf("Looking for seed %d\n", seed)
 		currVal := seed
 
 		for _, mapping := range mappingSet {
@@ -53,11 +51,10 @@ func part1() int {
 				}
 			}
 		}
-		// fmt.Printf("Got %d\n", currVal)
 		locations[seedIdx] = currVal
 	}
 
-	min := 999999999999999999
+	min := math.MaxInt
 	for _, val := range locations {
 		if val < min {
 			min = val
@@ -71,49 +68,51 @@ func part2() int {
 
 	parts := strings.Split(input, "\n\n")
 	seeds, _ := util.MapSliceWithError(strings.Split(parts[0], " ")[1:], strconv.Atoi)
-	fmt.Printf("Seeds: %v", seeds)
 
 	mappingSet := util.MapSlice(parts[1:], convertTextMap)
+	slices.Reverse(mappingSet)
 
-	fmt.Printf("%v\n", mappingSet)
-	locations := make(map[int]int)
-	for i := 0; i < len(seeds); i += 2 {
-		for seed := seeds[i]; seed < seeds[i]+seeds[i+1]-1; seed++ {
-			// fmt.Printf("Looking for seed %d\n", seed)
-			if _, exists := locations[seed]; exists {
-				continue
-			}
-			currVal := seed
-
-			for _, mapping := range mappingSet {
-			MappingLookup:
-				for _, mapEntry := range mapping {
-					res := mapEntry.getMappedValue(currVal)
-					if res != -1 {
-						currVal = res
-						break MappingLookup
-					}
+	seed := 0
+	for {
+		currVal := seed
+		for _, mapping := range mappingSet {
+		MappingLookup:
+			for _, mapEntry := range mapping {
+				res := mapEntry.getReverseMappedValue(currVal)
+				if res != -1 {
+					currVal = res
+					break MappingLookup
 				}
 			}
-			// fmt.Printf("Got %d\n", currVal)
-			locations[seed] = currVal
 		}
+		if isInSeedRange(currVal, seeds) {
+			break
+		}
+		seed++
 	}
 
-	min := 999999999999999
-	for _, val := range locations {
-		if val < min {
-			min = val
+	return seed
+}
+
+func isInSeedRange(val int, seeds []int) bool {
+	for i := 0; i < len(seeds); i += 2 {
+		if val >= seeds[i] && val < seeds[i]+seeds[i+1] {
+			return true
 		}
 	}
-
-	return min
-
+	return false
 }
 
 func (m *Mapping) getMappedValue(val int) int {
 	if val >= m.source && val < m.source+m.dist {
 		return (val - m.source) + m.dest
+	}
+	return -1
+}
+
+func (m *Mapping) getReverseMappedValue(val int) int {
+	if val >= m.dest && val < m.dest+m.dist {
+		return (val - m.dest) + m.source
 	}
 	return -1
 }
