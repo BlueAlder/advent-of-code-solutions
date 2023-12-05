@@ -34,8 +34,6 @@ package $daynum
 
 import (
 	_ "embed"
-
-  util "github.com/BlueAlder/advent-of-code-solutions/utils"
 )
 
 //go:embed input.txt
