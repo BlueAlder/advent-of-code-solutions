@@ -2,6 +2,7 @@ package solutions
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day01"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day02"
@@ -24,6 +25,12 @@ func Run(day int, part int) {
 	if !ext {
 		util.LogFatal("day does not exist in function map")
 	}
+
+	startTime := time.Now()
 	answer := v.(func(int) int)(part)
-	fmt.Printf("Part %d: %d\n", part, answer)
+	elapsedTime := time.Since(startTime)
+
+	util.LogGood("Part %d: %d", part, answer)
+	fmt.Printf("Solution took %s to run.\n\n", elapsedTime)
+
 }
