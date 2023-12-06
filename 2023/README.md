@@ -7,4 +7,4 @@ solve them all in go, to upskill myself in golang
 
 To run a particular day use:
 
-`go run main.go -d <challenge_number>`
+`go run main.go -d <challenge_number> -p <part>`
