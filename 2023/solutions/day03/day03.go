@@ -15,9 +15,9 @@ var input string
 
 func Solve(part int) int {
 	if part == 1 {
-		return part1()
+		return part1(input)
 	} else if part == 2 {
-		return part2()
+		return part2(input)
 	} else {
 		util.LogFatal("invalid part number")
 		return -1
@@ -26,8 +26,8 @@ func Solve(part int) int {
 
 type Set map[int]struct{}
 
-func part1() (total int) {
-	lines := strings.Split(input, "\n")
+func part1(inputData string) (total int) {
+	lines := strings.Split(inputData, "\n")
 	rowLength := len(lines[0])
 	data := strings.Join(lines, "")
 
@@ -53,8 +53,8 @@ func part1() (total int) {
 	return total
 }
 
-func part2() (total int) {
-	lines := strings.Split(input, "\n")
+func part2(inputData string) (total int) {
+	lines := strings.Split(inputData, "\n")
 	rowLength := len(lines[0])
 	data := strings.Join(lines, "")
 

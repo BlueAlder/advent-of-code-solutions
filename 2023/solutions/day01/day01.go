@@ -15,9 +15,9 @@ var input string
 
 func Solve(part int) int {
 	if part == 1 {
-		return calculateCalibration(false)
+		return calculateCalibration(input, false)
 	} else if part == 2 {
-		return calculateCalibration(true)
+		return calculateCalibration(input, true)
 	} else {
 		util.LogFatal("invalid part")
 		return -1
@@ -54,11 +54,11 @@ func getFirstDigit(line string, digitWords []string, part2 bool) (val string) {
 	return
 }
 
-func calculateCalibration(part2 bool) int {
+func calculateCalibration(inputData string, part2 bool) int {
 	var DIGIT_WORDS = []string{"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
 	total := 0
 
-	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner := bufio.NewScanner(strings.NewReader(inputData))
 	for scanner.Scan() {
 		// Get first digit from line
 		line := scanner.Text()

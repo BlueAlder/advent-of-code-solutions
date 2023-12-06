@@ -16,17 +16,17 @@ var input string
 
 func Solve(part int) int {
 	if part == 1 {
-		return part1()
+		return part1(input)
 	} else if part == 2 {
-		return part2()
+		return part2(input)
 	} else {
 		util.LogFatal("invalid part number")
 		return -1
 	}
 }
 
-func part1() (total int) {
-	cards := strings.Split(input, "\n")
+func part1(inputData string) (total int) {
+	cards := strings.Split(inputData, "\n")
 
 	for _, card := range cards {
 		winning, picked := getWinningAndPickedNumbers(card)
@@ -37,8 +37,8 @@ func part1() (total int) {
 	return
 }
 
-func part2() (total int) {
-	cards := strings.Split(input, "\n")
+func part2(inputData string) (total int) {
+	cards := strings.Split(inputData, "\n")
 	cardCount := make([]int, len(cards))
 
 	for idx, card := range cards {

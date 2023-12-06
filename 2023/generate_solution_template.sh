@@ -42,15 +42,50 @@ var input string
 func Solve(part int) int {
 	panic("unimplemented")
 	// if part == 1 {
-	// 	return part1()
+	// 	return part1(input)
 	// } else if part == 2 {
-	// 	return part2()
+	// 	return part2(input)
 	// } else {
 	// 	util.LogFatal("invalid part number")
 	// 	return -1
 	// }
 }
+
+func part1(inputData string) int {
+	return -1
+}
+
+func part2(inputData string) int {
+	return -1
+}
+
 EOF
+
+cat <<EOF > ${daynum}_test.go
+package $daynum
+
+import "testing"
+
+const exampleInput string = ``
+
+func TestPart1(t *testing.T) {
+	answer := part1(exampleInput)
+	solution := 123
+	if answer != solution {
+		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
+	}
+}
+
+func TestPart2(t *testing.T) {
+	answer := part2(exampleInput)
+	solution := 123
+	if answer != solution {
+		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
+	}
+}
+
+EOF
+
 
 touch input.txt
 

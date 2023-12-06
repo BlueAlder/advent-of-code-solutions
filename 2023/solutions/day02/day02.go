@@ -14,7 +14,7 @@ import (
 var input string
 
 func Solve(part int) int {
-	p1, p2 := solve()
+	p1, p2 := solve(input)
 	if part == 1 {
 		return p1
 	} else if part == 2 {
@@ -25,7 +25,7 @@ func Solve(part int) int {
 	}
 }
 
-func solve() (int, int) {
+func solve(inputData string) (int, int) {
 	max := map[string]int{
 		"red":   12,
 		"blue":  14,
@@ -34,7 +34,7 @@ func solve() (int, int) {
 
 	total := 0
 	powerTotal := 0
-	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner := bufio.NewScanner(strings.NewReader(inputData))
 	for scanner.Scan() {
 		line := scanner.Text()
 		id, err := extractGameID(line)
