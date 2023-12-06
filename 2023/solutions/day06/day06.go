@@ -60,10 +60,9 @@ func getWinnable(r Race) int {
 	b := float64(r.time)
 	c := float64(r.distance)
 	disc := math.Sqrt((b * b) - (4 * c))
-	// Adding small values here in case we get an exact root since
-	// we need to BEAT the record distance
-	min := math.Ceil((b-disc)/2 + 0.00001)
-	max := math.Floor((b+disc)/2 - 0.00001)
+	// Need to beat the value, so floor/ceil after adding/subtracting 1
+	min := math.Floor((b-disc)/2 + 1)
+	max := math.Ceil((b+disc)/2 - 1)
 	// +1 here to count the end bound
 	return int(max - min + 1)
 }
