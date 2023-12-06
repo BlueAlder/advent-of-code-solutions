@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"sync"
 
 	util "github.com/BlueAlder/advent-of-code-solutions/utils"
 )
@@ -74,23 +75,31 @@ func part2(inputData string) int {
 	mappingSet := util.MapSlice(parts[1:], convertTextMap)
 
 	min := math.MaxInt
-	for i := 0; i < len(seeds); i += 2 {
-		r := Interval{seeds[i], seeds[i+1]}
-		ranges := []Interval{r}
+	var wg sync.WaitGroup
 
-		for _, mappings := range mappingSet {
-			var mapped []Interval
-			for _, source := range ranges {
-				mapped = append(mapped, mapRangeToRanges(source, mappings)...)
+	for i := 0; i < len(seeds); i += 2 {
+		wg.Add(1)
+		go func(j int) {
+			defer wg.Done()
+			r := Interval{seeds[j], seeds[j+1]}
+			ranges := []Interval{r}
+
+			for _, mappings := range mappingSet {
+				var mapped []Interval
+				for _, source := range ranges {
+					mapped = append(mapped, mapRangeToRanges(source, mappings)...)
+				}
+				ranges = mapped
 			}
-			ranges = mapped
-		}
-		for _, i := range ranges {
-			if i.start < min {
-				min = i.start
+			for _, i := range ranges {
+				if i.start < min {
+					min = i.start
+				}
 			}
-		}
+		}(i)
 	}
+
+	wg.Wait()
 
 	return min
 }
