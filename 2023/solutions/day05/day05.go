@@ -4,7 +4,6 @@ package day05
 import (
 	_ "embed"
 	"math"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -16,9 +15,9 @@ var input string
 
 func Solve(part int) int {
 	if part == 1 {
-		return part1()
+		return part1(input)
 	} else if part == 2 {
-		return part2new()
+		return part2(input)
 	} else {
 		util.LogFatal("invalid part number")
 		return -1
@@ -35,8 +34,8 @@ type Interval struct {
 	dist  int
 }
 
-func part1() int {
-	parts := strings.Split(input, "\n\n")
+func part1(inputData string) int {
+	parts := strings.Split(inputData, "\n\n")
 	seeds, _ := util.MapSliceWithError(strings.Split(parts[0], " ")[1:], strconv.Atoi)
 
 	mappingSet := util.MapSlice(parts[1:], convertTextMap)
@@ -68,58 +67,32 @@ func part1() int {
 	return min
 }
 
-func part2() int {
-
-	parts := strings.Split(input, "\n\n")
+func part2(inputData string) int {
+	parts := strings.Split(inputData, "\n\n")
 	seeds, _ := util.MapSliceWithError(strings.Split(parts[0], " ")[1:], strconv.Atoi)
 
 	mappingSet := util.MapSlice(parts[1:], convertTextMap)
-	slices.Reverse(mappingSet)
 
-	seed := 0
-	for {
-		currVal := seed
-		for _, mapping := range mappingSet {
-		MappingLookup:
-			for _, mapEntry := range mapping {
-				res := mapEntry.getReverseMappedValue(currVal)
-				if res != -1 {
-					currVal = res
-					break MappingLookup
-				}
-			}
-		}
-		if isInSeedRange(currVal, seeds) {
-			break
-		}
-		seed++
-	}
-
-	return seed
-}
-
-func part2new() int {
-	parts := strings.Split(input, "\n\n")
-	seeds, _ := util.MapSliceWithError(strings.Split(parts[0], " ")[1:], strconv.Atoi)
-
-	mappingSet := util.MapSlice(parts[1:], convertTextMap)
-	// slices.Reverse(mappingSet)
-
-	// 1. Order location ranges smallest to largest
-
+	min := math.MaxInt
 	for i := 0; i < len(seeds); i += 2 {
 		r := Interval{seeds[i], seeds[i+1]}
 		ranges := []Interval{r}
 
-		var mapped []Interval
 		for _, mappings := range mappingSet {
+			var mapped []Interval
 			for _, source := range ranges {
 				mapped = append(mapped, mapRangeToRanges(source, mappings)...)
+			}
+			ranges = mapped
+		}
+		for _, i := range ranges {
+			if i.start < min {
+				min = i.start
 			}
 		}
 	}
 
-	return -1
+	return min
 }
 
 func mapRangeToRanges(i Interval, ms []Mapping) (mapped []Interval) {
@@ -129,7 +102,7 @@ func mapRangeToRanges(i Interval, ms []Mapping) (mapped []Interval) {
 			if m.source.containsValue(i.getEndValue()) {
 				// Left Split [1]
 				left := Interval{i.start, m.source.start - i.start}
-				inside := Interval{m.getMappedValue(m.source.start), i.getEndValue() - m.source.start}
+				inside := Interval{m.getMappedValue(m.source.start), i.getEndValue() - m.source.start + 1}
 				mapped = append(mapped, inside)
 				mapped = append(mapped, mapRangeToRanges(left, ms)...)
 				return
@@ -141,7 +114,7 @@ func mapRangeToRanges(i Interval, ms []Mapping) (mapped []Interval) {
 				// Overlaps whole interval [3]
 				left := Interval{i.start, m.source.start - i.start}
 				middle := Interval{m.getMappedValue(m.source.start), m.source.dist}
-				right := Interval{m.source.getEndValue() + 1, i.getEndValue() - m.source.getEndValue()}
+				right := Interval{m.source.getEndValue() + 1, i.getEndValue() - m.source.getEndValue() + 1}
 
 				mapped = append(mapped, middle)
 				mapped = append(mapped, mapRangeToRanges(left, ms)...)
@@ -154,12 +127,12 @@ func mapRangeToRanges(i Interval, ms []Mapping) (mapped []Interval) {
 		} else {
 			if m.source.containsValue(i.getEndValue()) {
 				// Middle of mapping [4]
-				mapped := Interval{m.getMappedValue(i.start), i.dist}
-				return []Interval{mapped}
+				mapped = append(mapped, Interval{m.getMappedValue(i.start), i.dist})
+				return
 			} else {
 				// Right Split [6]
-				right := Interval{m.source.start + 1, i.getEndValue() - m.source.getEndValue()}
-				inside := Interval{m.getMappedValue(i.start), m.source.getEndValue() - i.start}
+				right := Interval{m.source.getEndValue() + 1, i.getEndValue() - m.source.getEndValue()}
+				inside := Interval{m.getMappedValue(i.start), m.source.getEndValue() - i.start + 1}
 				mapped = append(mapped, inside)
 				mapped = append(mapped, mapRangeToRanges(right, ms)...)
 				return
@@ -169,25 +142,9 @@ func mapRangeToRanges(i Interval, ms []Mapping) (mapped []Interval) {
 	return []Interval{i}
 }
 
-func isInSeedRange(val int, seeds []int) bool {
-	for i := 0; i < len(seeds); i += 2 {
-		if val >= seeds[i] && val < seeds[i]+seeds[i+1] {
-			return true
-		}
-	}
-	return false
-}
-
 func (m Mapping) getMappedValue(val int) int {
 	if val >= m.source.start && val < m.source.start+m.source.dist {
 		return (val - m.source.start) + m.dest.start
-	}
-	return -1
-}
-
-func (m Mapping) getReverseMappedValue(val int) int {
-	if val >= m.dest.start && val < m.dest.start+m.dest.dist {
-		return (val - m.dest.start) + m.source.start
 	}
 	return -1
 }
