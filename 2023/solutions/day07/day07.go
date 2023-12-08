@@ -135,6 +135,7 @@ func (h Hand) getHandValue() int {
 // one pair : 1
 // high card : 0
 func (h Hand) getHandValueJoker() int {
+
 	count := make(map[rune]int)
 	for _, card := range h {
 		count[card]++

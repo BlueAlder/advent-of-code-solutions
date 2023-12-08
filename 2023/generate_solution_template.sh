@@ -52,11 +52,11 @@ func Solve(part int) int {
 }
 
 func part1(inputData string) int {
-	return -1
+	return 0
 }
 
 func part2(inputData string) int {
-	return -1
+	return 0
 }
 
 EOF
