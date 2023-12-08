@@ -3,6 +3,7 @@ package day07
 
 import (
 	_ "embed"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -87,44 +88,46 @@ func getCardValue(r rune, cardValues []rune) int {
 
 }
 
-// five of a kind : 6
-// Four of a kind: 5
-// full house : 4
-// three of a kind : 3
-// two pair : 2
-// one pair : 1
-// high card : 0
+const (
+	High_Card       int = 0
+	One_Pair        int = iota
+	Two_Pair        int = iota
+	Three_of_a_kind int = iota
+	Full_House      int = iota
+	Four_of_a_Kind  int = iota
+	Five_of_a_Kind  int = iota
+)
+
 func (h Hand) getHandValue() int {
 	vals := make(map[rune]int)
 	for _, card := range h {
 		vals[card]++
 	}
-
-	if len(vals) == 1 {
-		// Five of a kind
-		return 6
-	} else if len(vals) == 2 {
-		if vals[rune(h[0])] == 4 || vals[rune(h[0])] == 1 {
-			// 4 of a kind
-			return 5
-		}
-		// Full house
-		return 4
-	} else if len(vals) == 3 {
-		for _, card := range h {
-			if vals[card] == 3 {
-				// three of a kind
-				return 3
-			} else if vals[card] == 2 {
-				// Two pair
-				return 2
-			}
-		}
-	} else if len(vals) == 4 {
-		// one pair
-		return 1
+	var count []int
+	for _, v := range vals {
+		count = append(count, v)
 	}
-	return 0
+	slices.Sort(count)
+	slices.Reverse(count)
+
+	switch count[0] {
+	case 5:
+		return Five_of_a_Kind
+	case 4:
+		return Four_of_a_Kind
+	case 3:
+		if count[1] == 2 {
+			return Full_House
+		}
+		return Three_of_a_kind
+	case 2:
+		if count[1] == 2 {
+			return Two_Pair
+		}
+		return One_Pair
+	default:
+		return High_Card
+	}
 }
 
 // five of a kind : 6
