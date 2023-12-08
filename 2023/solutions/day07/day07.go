@@ -34,35 +34,39 @@ type Play struct {
 
 func part1(inputData string) int {
 	var cardValues = []rune{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
+	return calculateTotal(inputData, cardValues, false)
+}
 
+func part2(inputData string) int {
+	var cardValues = []rune{'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'}
+	return calculateTotal(inputData, cardValues, true)
+}
+
+func calculateTotal(inputData string, cardValues []rune, joker bool) int {
 	lines := strings.Split(inputData, "\n")
-
 	plays := util.MapSlice(lines, func(line string) Play {
 		parts := strings.Split(line, " ")
 		bid, _ := strconv.Atoi(parts[1])
 		return Play{hand: Hand(parts[0]), bid: bid}
 	})
-
 	sort.Slice(plays, func(i, j int) bool {
-		return plays[j].hand.beats(plays[i].hand, cardValues, false)
+		return plays[j].hand.beats(plays[i].hand, cardValues, joker)
 	})
-
 	total := 0
 	for idx, play := range plays {
 		total += play.bid * (idx + 1)
 	}
-
 	return total
 }
 
 func (h1 Hand) beats(h2 Hand, cardValues []rune, joker bool) bool {
 	var val1, val2 int
 	if joker {
-		val1 = h1.getHandValueJoker()
-		val2 = h2.getHandValueJoker()
+		val1 = getHandValueWithJoker(h1, cardValues)
+		val2 = getHandValueWithJoker(h2, cardValues)
 	} else {
-		val1 = h1.getHandValue()
-		val2 = h2.getHandValue()
+		val1 = getHandValue(h1)
+		val2 = getHandValue(h2)
 	}
 
 	if val1 == val2 {
@@ -98,7 +102,18 @@ const (
 	Five_of_a_Kind  int = iota
 )
 
-func (h Hand) getHandValue() int {
+func getHandValueWithJoker(h Hand, cardValues []rune) (max int) {
+	for _, v := range cardValues {
+		tmp := strings.Replace(string(h), "J", string(v), -1)
+		val := getHandValue(Hand(tmp))
+		if val > max {
+			max = val
+		}
+	}
+	return
+}
+
+func getHandValue(h Hand) int {
 	vals := make(map[rune]int)
 	for _, card := range h {
 		vals[card]++
@@ -128,96 +143,4 @@ func (h Hand) getHandValue() int {
 	default:
 		return High_Card
 	}
-}
-
-// five of a kind : 6
-// Four of a kind: 5
-// full house : 4
-// three of a kind : 3
-// two pair : 2
-// one pair : 1
-// high card : 0
-func (h Hand) getHandValueJoker() int {
-
-	count := make(map[rune]int)
-	for _, card := range h {
-		count[card]++
-	}
-
-	jokers := count['J']
-
-	if len(count) == 1 {
-		// Five of a kind
-		return 6
-	} else if len(count) == 2 {
-
-		if count[rune(h[0])] == 4 || count[rune(h[0])] == 1 {
-			// 4 of a kind
-			if jokers > 0 {
-				return 6
-			}
-			return 5
-		}
-		if jokers > 0 {
-			return 6
-		}
-		// Full house
-		return 4
-
-	} else if len(count) == 3 {
-		for _, card := range h {
-			if count[card] == 3 {
-				if jokers > 0 {
-					return 5
-				}
-				// three of a kind
-				return 3
-			} else if count[card] == 2 {
-				if jokers == 1 {
-					// Full house
-					return 4
-				} else if jokers == 2 {
-					return 5
-				}
-				// Two pair
-				return 2
-			}
-		}
-	} else if len(count) == 4 {
-		// one pair
-		if jokers > 0 {
-			return 3
-		}
-		return 1
-	}
-
-	// 5 diff cards
-	if jokers > 0 {
-		return 1
-	}
-	return 0
-}
-
-func part2(inputData string) int {
-
-	var cardValues = []rune{'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'}
-
-	lines := strings.Split(inputData, "\n")
-
-	plays := util.MapSlice(lines, func(line string) Play {
-		parts := strings.Split(line, " ")
-		bid, _ := strconv.Atoi(parts[1])
-		return Play{hand: Hand(parts[0]), bid: bid}
-	})
-
-	sort.Slice(plays, func(i, j int) bool {
-		return plays[j].hand.beats(plays[i].hand, cardValues, true)
-	})
-
-	total := 0
-	for idx, play := range plays {
-		total += play.bid * (idx + 1)
-	}
-
-	return total
 }
