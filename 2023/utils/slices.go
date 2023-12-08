@@ -27,3 +27,12 @@ func ReduceSlice[T, U any](slice []T, f func(T, U) U) U {
 	}
 	return accumulator
 }
+
+func SliceEvery[T any](slice []T, f func(T) bool) bool {
+	for i := range slice {
+		if !f(slice[i]) {
+			return false
+		}
+	}
+	return true
+}

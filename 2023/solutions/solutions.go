@@ -11,6 +11,7 @@ import (
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day05"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day06"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day07"
+	"github.com/BlueAlder/advent-of-code-solutions/solutions/day08"
 	util "github.com/BlueAlder/advent-of-code-solutions/utils"
 )
 
@@ -22,6 +23,7 @@ var slns = map[int]interface{}{
 	5: day05.Solve,
 	6: day06.Solve,
 	7: day07.Solve,
+	8: day08.Solve,
 }
 
 func Run(day int, part int) {
