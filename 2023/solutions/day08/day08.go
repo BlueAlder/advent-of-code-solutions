@@ -3,7 +3,6 @@ package day08
 
 import (
 	_ "embed"
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -97,7 +96,6 @@ func part2(inputData string) int {
 	dists := make([]int, len(startingNodes))
 	for i, start := range startingNodes {
 		dists[i] = start.getDistanceToZ(instructions)
-		fmt.Println(dists)
 	}
 	return util.LCM(dists[0], dists[1], dists[2:]...)
 }
