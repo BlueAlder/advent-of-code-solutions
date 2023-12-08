@@ -40,7 +40,7 @@ import (
 var input string
 
 func Solve(part int) int {
-	panic("unimplemented")
+	return part1(input)
 	// if part == 1 {
 	// 	return part1(input)
 	// } else if part == 2 {
@@ -66,11 +66,11 @@ package $daynum
 
 import "testing"
 
-const exampleInput string = ``
+const exampleInput string = ""
 
 func TestPart1(t *testing.T) {
 	answer := part1(exampleInput)
-	solution := 123
+	solution := -1
 	if answer != solution {
 		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
 	}
@@ -78,7 +78,7 @@ func TestPart1(t *testing.T) {
 
 func TestPart2(t *testing.T) {
 	answer := part2(exampleInput)
-	solution := 123
+	solution := -1
 	if answer != solution {
 		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
 	}
