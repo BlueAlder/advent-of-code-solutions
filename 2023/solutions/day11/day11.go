@@ -3,8 +3,6 @@ package day11
 
 import (
 	_ "embed"
-	"fmt"
-	"slices"
 	"strings"
 
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
@@ -33,23 +31,56 @@ type Point struct {
 }
 
 func part1(inputData string) int {
+	return findDistancesWithExpansionFactor(inputData, 2)
+}
+
+func part2(inputData string) int {
+	return findDistancesWithExpansionFactor(inputData, 1000000)
+}
+
+func findDistancesWithExpansionFactor(inputData string, expansionFactor int) int {
 	var u Universe = strings.Split(inputData, "\n")
 	eRows := u.findEmptyRows()
 	eCols := u.findEmptyColumns()
 
-	fmt.Println(eRows)
-	fmt.Println(eCols)
-
-	u = u.expandUniverse(eRows, eCols)
 	galaxies := u.findAllGalaxies()
-	dists := u.calculateDistances(galaxies)
+	dists := u.calculateDistancesWithExpansion(galaxies, expansionFactor, eRows, eCols)
 
 	sum := 0
 	for _, v := range dists {
 		sum += v
 	}
-
 	return sum
+}
+
+func (u Universe) calculateDistancesWithExpansion(galaxies []Point, expansionFactor int, eRows, eCols []int) []int {
+	var distances []int
+	pairIndexes := combin.Combinations(len(galaxies), 2)
+	for _, pair := range pairIndexes {
+		g1 := galaxies[pair[0]]
+		g2 := galaxies[pair[1]]
+
+		eRowsCrossed := util.ReduceSlice(eRows, func(eRow int, count int) int {
+			if util.EqualOrBetween(g1.y, g2.y, eRow) {
+				return count + 1
+			}
+			return count
+		})
+
+		eColsCrossed := util.ReduceSlice(eCols, func(eCol int, count int) int {
+			if util.EqualOrBetween(g1.x, g2.x, eCol) {
+				return count + 1
+			}
+			return count
+		})
+
+		dist := util.Abs(g1.x-g2.x) + util.Abs(g1.y-g2.y) -
+			(eColsCrossed + eRowsCrossed) +
+			expansionFactor*(eColsCrossed+eRowsCrossed)
+		distances = append(distances, dist)
+	}
+
+	return distances
 }
 
 func (u Universe) findEmptyRows() []int {
@@ -77,31 +108,6 @@ Column:
 	return emptyColumns
 }
 
-func (u Universe) expandUniverse(rowIdxs, colIdxs []int) Universe {
-	// Add cols
-	for added, colIdx := range colIdxs {
-		for i, row := range u {
-			updatedRow := row[:colIdx+added] + "." + row[colIdx+added:]
-			u[i] = updatedRow
-		}
-	}
-
-	// Add rows
-
-	rowLen := len(u[0])
-	emptyRow := strings.Repeat(".", rowLen)
-	for added, rowIdx := range rowIdxs {
-		u = slices.Insert(u, rowIdx+added, emptyRow)
-	}
-
-	for _, line := range u {
-		fmt.Println(line)
-	}
-
-	return u
-
-}
-
 func (u Universe) findAllGalaxies() []Point {
 	var galaxies []Point
 	for y, row := range u {
@@ -112,28 +118,4 @@ func (u Universe) findAllGalaxies() []Point {
 		}
 	}
 	return galaxies
-}
-
-func (u Universe) calculateDistances(galaxies []Point) []int {
-	var distances []int
-	pairIndexes := combin.Combinations(len(galaxies), 2)
-	for _, pair := range pairIndexes {
-		g1 := galaxies[pair[0]]
-		g2 := galaxies[pair[1]]
-		dist := Abs(g1.x-g2.x) + Abs(g1.y-g2.y)
-		distances = append(distances, dist)
-	}
-
-	return distances
-}
-
-func part2(inputData string) int {
-	return 0
-}
-
-func Abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
 }

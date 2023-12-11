@@ -17,3 +17,17 @@ func LCM(a, b int, nums ...int) int {
 	}
 	return res
 }
+
+// Checks if the int x is between or equal to
+// the values a and b
+func EqualOrBetween(a, b, x int) bool {
+	return a <= x && x <= b ||
+		(a-x)*(b-x) <= 0
+}
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
