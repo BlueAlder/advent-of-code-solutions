@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"errors"
 	"reflect"
-	"slices"
 	"strings"
 
 	"github.com/BlueAlder/advent-of-code-solutions/pkg/sets"
@@ -77,19 +76,20 @@ func part1(inputData string) int {
 
 func part2(inputData string) (area int) {
 	var m PipeMap = strings.Split(inputData, "\n")
-
+	upFacing := make(sets.Set[string])
+	upFacing.Add("|", "J", "L")
 	path := m.walkThePath()
 	for y, line := range m {
 		inside := false
 		for x := range line {
 			p := Point{x: x, y: y}
-			if _, exists := path[p]; exists {
+			if !path.Has(p) {
 				if inside {
 					area++
 				}
 			} else {
 				// Check for UP facing pipes
-				if slices.Contains([]string{"|", "J", "L"}, string(m[p.y][p.x])) {
+				if upFacing.Has(string(m[p.y][p.x])) {
 					inside = !inside
 				}
 			}
@@ -143,7 +143,7 @@ func (m PipeMap) walkThePath() sets.Set[Point] {
 	for {
 		curr.x += dir.dx
 		curr.y += dir.dy
-		path[curr] = struct{}{}
+		path.Add(curr)
 		if curr == start {
 			break
 		}
