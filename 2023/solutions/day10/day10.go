@@ -4,8 +4,7 @@ package day10
 import (
 	_ "embed"
 	"errors"
-	"fmt"
-	"maps"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -50,11 +49,11 @@ type Pipe struct {
 
 var pipes = map[string]Pipe{
 	"|": {entries: []Direction{up, down}, exits: []Direction{up, down}},
-	"-": {entries: []Direction{left, right}, exits: []Direction{left, right}},
-	"L": {entries: []Direction{down, left}, exits: []Direction{right, up}},
-	"J": {entries: []Direction{down, right}, exits: []Direction{left, up}},
+	"-": {entries: []Direction{right, left}, exits: []Direction{right, left}},
+	"L": {entries: []Direction{left, down}, exits: []Direction{up, right}},
+	"J": {entries: []Direction{right, down}, exits: []Direction{up, left}},
 	"7": {entries: []Direction{right, up}, exits: []Direction{down, left}},
-	"F": {entries: []Direction{left, up}, exits: []Direction{down, right}},
+	"F": {entries: []Direction{up, left}, exits: []Direction{right, down}},
 }
 
 func (p Pipe) getExitFromEntry(d Direction) (Direction, error) {
@@ -69,36 +68,57 @@ func (p Pipe) getExitFromEntry(d Direction) (Direction, error) {
 func part1(inputData string) int {
 
 	lines := strings.Split(inputData, "\n")
-	// Find S
+	path := walkThePath(lines)
+	return len(path) / 2
+}
+
+func getStartingPipe(s Point, lines []string) string {
+	var outputs []Direction
+	for _, dir := range directions {
+		if !isInBounds(lines, Point{s.x + dir.dx, s.y + dir.dy}) {
+			continue
+		}
+		sym := string(lines[s.y+dir.dy][s.x+dir.dx])
+		pipe, exists := pipes[sym]
+		if !exists {
+			continue
+		}
+		if _, err := pipe.getExitFromEntry(dir); err == nil {
+			outputs = append(outputs, dir)
+		}
+	}
+
+	for k, v := range pipes {
+		if reflect.DeepEqual(v.exits, outputs) {
+			return k
+		}
+	}
+	panic("no pipe found")
+}
+
+func findStartPoint(lines []string) Point {
 	var s Point
 	for y, line := range lines {
 		if x := strings.Index(line, "S"); x != -1 {
 			s = Point{x, y}
 			break
 		}
-
 	}
-	curr := s
-	var direction Direction
-	// Find start
-	for _, dir := range directions {
-		sym := string(lines[curr.y+dir.dy][curr.x+dir.dx])
-		pipe, exists := pipes[sym]
-		if !exists {
-			continue
-		}
-		if _, err := pipe.getExitFromEntry(dir); err == nil {
-			direction = dir
-			break
-		}
-	}
+	return s
+}
 
-	steps := 0
+func walkThePath(lines []string) []Point {
+	var path []Point
+	start := findStartPoint(lines)
+	sPipe := getStartingPipe(start, lines)
+	lines[start.y] = strings.Replace(lines[start.y], "S", sPipe, 1)
+	dir := pipes[sPipe].exits[0]
+	curr := start
 	for {
-		steps++
-		curr.x += direction.dx
-		curr.y += direction.dy
-		if curr == s {
+		curr.x += dir.dx
+		curr.y += dir.dy
+		path = append(path, curr)
+		if curr == start {
 			break
 		}
 
@@ -109,102 +129,44 @@ func part1(inputData string) int {
 			panic("invalid pipe direction")
 		}
 		var err error
-		direction, err = pipe.getExitFromEntry(direction)
+		dir, err = pipe.getExitFromEntry(dir)
 		if err != nil {
 			panic("invalid direction")
 		}
 	}
-	return steps / 2
+	return path
 }
 
 func part2(inputData string) int {
 	lines := strings.Split(inputData, "\n")
 	// Find S
-	var s Point
+
+	path := walkThePath(lines)
+	area := 0
 	for y, line := range lines {
-		if x := strings.Index(line, "S"); x != -1 {
-			s = Point{x, y}
-			break
-		}
+		crosses := 0
+		for x := range line {
+			p := Point{x: x, y: y}
+			// on the path
+			if !slices.Contains(path, p) {
 
-	}
-	curr := s
-	var direction Direction
-	// Find start
-	for _, dir := range directions {
-		if !isInBounds(lines, Point{curr.x + dir.dx, curr.y + dir.dy}) {
-			continue
-		}
-
-		sym := string(lines[curr.y+dir.dy][curr.x+dir.dx])
-		pipe, exists := pipes[sym]
-		if !exists {
-			continue
-		}
-		if _, err := pipe.getExitFromEntry(dir); err == nil {
-			direction = dir
-			break
+				if crosses%2 != 0 {
+					area++
+				}
+			} else {
+				if slices.Contains([]string{"|", "J", "7"}, string(lines[p.y][p.x])) {
+					crosses++
+				}
+			}
 		}
 	}
 
-	// Walk the path and flood fill everything on the right of the
-	//  facing direction
-	area := make(map[Point]struct{})
-	for {
-		curr.x += direction.dx
-		curr.y += direction.dy
-		if curr == s {
-			break
-		}
+	return 0
 
-		// get element to the right of where we are facing
-		rightDirIdx := (((slices.Index(directions, direction) + 1) % len(directions)) + len(directions)) % len(directions)
-		rightDir := directions[rightDirIdx]
-		rightNode := Point{curr.x + rightDir.dx, curr.y + rightDir.dy}
-		if isInBounds(lines, rightNode) && string(lines[rightNode.y][rightNode.x]) == "." {
-			maps.Copy(area, floodFill(rightNode, lines))
-		}
-
-		sym := string(lines[curr.y][curr.x])
-
-		pipe, exists := pipes[sym]
-		if !exists {
-			panic("invalid pipe direction")
-		}
-		var err error
-		direction, err = pipe.getExitFromEntry(direction)
-		if err != nil {
-			panic("invalid direction")
-		}
-	}
-
-	for k := range area {
-		fmt.Println(k)
-	}
-	return len(area)
 }
 
 func isInBounds(lines []string, p Point) bool {
 	xInBound := p.x >= 0 && p.x < len(lines[0])
 	yInBound := p.y >= 0 && p.y < len(lines)
 	return xInBound && yInBound
-}
-
-func floodFill(start Point, lines []string) map[Point]struct{} {
-	queue := []Point{start}
-	floods := make(map[Point]struct{})
-	for len(queue) > 0 {
-		n := queue[0]
-		queue = queue[1:]
-		_, seen := floods[n]
-		if isInBounds(lines, n) && string(lines[n.y][n.x]) == "." &&
-			!seen {
-			floods[n] = struct{}{}
-			queue = append(queue, Point{n.x + 1, n.y})
-			queue = append(queue, Point{n.x, n.y + 1})
-			queue = append(queue, Point{n.x - 1, n.y})
-			queue = append(queue, Point{n.x, n.y - 1})
-		}
-	}
-	return floods
 }
