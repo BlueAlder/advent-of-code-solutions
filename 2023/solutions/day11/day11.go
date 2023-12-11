@@ -3,6 +3,7 @@ package day11
 
 import (
 	_ "embed"
+	"image"
 	"strings"
 
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
@@ -24,11 +25,6 @@ func Solve(part int) int {
 }
 
 type Universe []string
-
-type Point struct {
-	x int
-	y int
-}
 
 func part1(inputData string) int {
 	return findDistancesWithExpansionFactor(inputData, 2)
@@ -53,7 +49,7 @@ func findDistancesWithExpansionFactor(inputData string, expansionFactor int) int
 	return sum
 }
 
-func (u Universe) calculateDistancesWithExpansion(galaxies []Point, expansionFactor int, eRows, eCols []int) []int {
+func (u Universe) calculateDistancesWithExpansion(galaxies []image.Point, expansionFactor int, eRows, eCols []int) []int {
 	var distances []int
 	pairIndexes := combin.Combinations(len(galaxies), 2)
 	for _, pair := range pairIndexes {
@@ -61,20 +57,20 @@ func (u Universe) calculateDistancesWithExpansion(galaxies []Point, expansionFac
 		g2 := galaxies[pair[1]]
 
 		eRowsCrossed := util.ReduceSlice(eRows, func(eRow int, count int) int {
-			if util.EqualOrBetween(g1.y, g2.y, eRow) {
+			if util.EqualOrBetween(g1.Y, g2.Y, eRow) {
 				return count + 1
 			}
 			return count
 		})
 
 		eColsCrossed := util.ReduceSlice(eCols, func(eCol int, count int) int {
-			if util.EqualOrBetween(g1.x, g2.x, eCol) {
+			if util.EqualOrBetween(g1.X, g2.X, eCol) {
 				return count + 1
 			}
 			return count
 		})
 
-		dist := util.Abs(g1.x-g2.x) + util.Abs(g1.y-g2.y) -
+		dist := util.Abs(g1.X-g2.X) + util.Abs(g1.Y-g2.Y) -
 			(eColsCrossed + eRowsCrossed) +
 			expansionFactor*(eColsCrossed+eRowsCrossed)
 		distances = append(distances, dist)
@@ -108,12 +104,12 @@ Column:
 	return emptyColumns
 }
 
-func (u Universe) findAllGalaxies() []Point {
-	var galaxies []Point
+func (u Universe) findAllGalaxies() []image.Point {
+	var galaxies []image.Point
 	for y, row := range u {
 		for x := range row {
 			if string(u[y][x]) == "#" {
-				galaxies = append(galaxies, Point{x: x, y: y})
+				galaxies = append(galaxies, image.Point{X: x, Y: y})
 			}
 		}
 	}

@@ -39,7 +39,8 @@ func Run(day int, part int) {
 	fmt.Printf("Running solution for day %d part %d\n", day, part)
 	v, ext := slns[day]
 	if !ext {
-		util.LogFatal("day does not exist in function map")
+		util.LogWarn("Day %d has not been implemented yet", day)
+		return
 	}
 
 	startTime := time.Now()
@@ -51,7 +52,7 @@ func Run(day int, part int) {
 	if elapsedTime > TARGET_TIME {
 		util.LogWarn("Solution took %s to run.\n", elapsedTime)
 	} else {
-		fmt.Printf("Solution took %s to run.\n\n", elapsedTime)
+		fmt.Printf("Solution took "+util.ColorGreen+"%s"+util.ColorReset+" to run.\n\n", elapsedTime)
 	}
 	// submit(day, part, answer)
 

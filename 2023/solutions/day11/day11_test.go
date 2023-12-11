@@ -23,7 +23,7 @@ func TestPart1(t *testing.T) {
 
 func TestPart2(t *testing.T) {
 	answer := part2(exampleInput)
-	solution := 8410
+	solution := 82000210
 	if answer != solution {
 		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
 	}
