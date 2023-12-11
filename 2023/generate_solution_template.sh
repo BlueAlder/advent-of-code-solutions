@@ -34,21 +34,22 @@ package $daynum
 
 import (
 	_ "embed"
+	
+	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 )
 
 //go:embed input.txt
 var input string
 
 func Solve(part int) int {
-	return part1(input)
-	// if part == 1 {
-	// 	return part1(input)
-	// } else if part == 2 {
-	// 	return part2(input)
-	// } else {
-	// 	util.LogFatal("invalid part number")
-	// 	return -1
-	// }
+	if part == 1 {
+		return part1(input)
+	} else if part == 2 {
+		return part2(input)
+	} else {
+		util.LogFatal("invalid part number")
+		return -1
+	}
 }
 
 func part1(inputData string) int {
