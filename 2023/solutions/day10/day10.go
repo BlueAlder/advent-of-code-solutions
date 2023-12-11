@@ -8,7 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	util "github.com/BlueAlder/advent-of-code-solutions/utils"
+	"github.com/BlueAlder/advent-of-code-solutions/pkg/sets"
+	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 )
 
 //go:embed input.txt
@@ -65,20 +66,56 @@ func (p Pipe) getExitFromEntry(d Direction) (Direction, error) {
 	return Direction{0, 0}, errors.New("invalid Entry")
 }
 
+type PipeMap []string
+
 func part1(inputData string) int {
 
-	lines := strings.Split(inputData, "\n")
-	path := walkThePath(lines)
+	var m PipeMap = strings.Split(inputData, "\n")
+	path := m.walkThePath()
 	return len(path) / 2
 }
 
-func getStartingPipe(s Point, lines []string) string {
+func part2(inputData string) (area int) {
+	var m PipeMap = strings.Split(inputData, "\n")
+
+	path := m.walkThePath()
+	for y, line := range m {
+		inside := false
+		for x := range line {
+			p := Point{x: x, y: y}
+			if _, exists := path[p]; exists {
+				if inside {
+					area++
+				}
+			} else {
+				// Check for UP facing pipes
+				if slices.Contains([]string{"|", "J", "L"}, string(m[p.y][p.x])) {
+					inside = !inside
+				}
+			}
+		}
+	}
+	return
+}
+
+func (m PipeMap) findStartPoint() Point {
+	var s Point
+	for y, line := range m {
+		if x := strings.Index(line, "S"); x != -1 {
+			s = Point{x, y}
+			break
+		}
+	}
+	return s
+}
+
+func (m PipeMap) getStartingPipe(s Point) string {
 	var outputs []Direction
 	for _, dir := range directions {
-		if !isInBounds(lines, Point{s.x + dir.dx, s.y + dir.dy}) {
+		if !m.isInBounds(Point{s.x + dir.dx, s.y + dir.dy}) {
 			continue
 		}
-		sym := string(lines[s.y+dir.dy][s.x+dir.dx])
+		sym := string(m[s.y+dir.dy][s.x+dir.dx])
 		pipe, exists := pipes[sym]
 		if !exists {
 			continue
@@ -96,33 +133,22 @@ func getStartingPipe(s Point, lines []string) string {
 	panic("no pipe found")
 }
 
-func findStartPoint(lines []string) Point {
-	var s Point
-	for y, line := range lines {
-		if x := strings.Index(line, "S"); x != -1 {
-			s = Point{x, y}
-			break
-		}
-	}
-	return s
-}
-
-func walkThePath(lines []string) []Point {
-	var path []Point
-	start := findStartPoint(lines)
-	sPipe := getStartingPipe(start, lines)
-	lines[start.y] = strings.Replace(lines[start.y], "S", sPipe, 1)
+func (m PipeMap) walkThePath() sets.Set[Point] {
+	path := make(sets.Set[Point])
+	start := m.findStartPoint()
+	sPipe := m.getStartingPipe(start)
+	m[start.y] = strings.Replace(m[start.y], "S", sPipe, 1)
 	dir := pipes[sPipe].exits[0]
 	curr := start
 	for {
 		curr.x += dir.dx
 		curr.y += dir.dy
-		path = append(path, curr)
+		path[curr] = struct{}{}
 		if curr == start {
 			break
 		}
 
-		sym := string(lines[curr.y][curr.x])
+		sym := string(m[curr.y][curr.x])
 
 		pipe, exists := pipes[sym]
 		if !exists {
@@ -137,36 +163,8 @@ func walkThePath(lines []string) []Point {
 	return path
 }
 
-func part2(inputData string) int {
-	lines := strings.Split(inputData, "\n")
-	// Find S
-
-	path := walkThePath(lines)
-	area := 0
-	for y, line := range lines {
-		crosses := 0
-		for x := range line {
-			p := Point{x: x, y: y}
-			// on the path
-			if !slices.Contains(path, p) {
-
-				if crosses%2 != 0 {
-					area++
-				}
-			} else {
-				if slices.Contains([]string{"|", "J", "7"}, string(lines[p.y][p.x])) {
-					crosses++
-				}
-			}
-		}
-	}
-
-	return 0
-
-}
-
-func isInBounds(lines []string, p Point) bool {
-	xInBound := p.x >= 0 && p.x < len(lines[0])
-	yInBound := p.y >= 0 && p.y < len(lines)
+func (m PipeMap) isInBounds(p Point) bool {
+	xInBound := p.x >= 0 && p.x < len(m[0])
+	yInBound := p.y >= 0 && p.y < len(m)
 	return xInBound && yInBound
 }

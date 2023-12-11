@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day01"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day02"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day03"
@@ -14,7 +15,6 @@ import (
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day08"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day09"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day10"
-	util "github.com/BlueAlder/advent-of-code-solutions/utils"
 )
 
 var slns = map[int]interface{}{
@@ -30,6 +30,8 @@ var slns = map[int]interface{}{
 	10: day10.Solve,
 }
 
+const TARGET_TIME = 10 * time.Millisecond
+
 func Run(day int, part int) {
 
 	fmt.Printf("Running solution for day %d part %d\n", day, part)
@@ -43,7 +45,12 @@ func Run(day int, part int) {
 	elapsedTime := time.Since(startTime)
 
 	util.LogGood("Part %d: %d", part, answer)
-	fmt.Printf("Solution took %s to run.\n\n", elapsedTime)
+
+	if elapsedTime > TARGET_TIME {
+		util.LogWarn("Solution took %s to run.\n", elapsedTime)
+	} else {
+		fmt.Printf("Solution took %s to run.\n\n", elapsedTime)
+	}
 	// submit(day, part, answer)
 
 }

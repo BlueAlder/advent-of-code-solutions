@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	util "github.com/BlueAlder/advent-of-code-solutions/utils"
+	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 )
 
 //go:embed input.txt

@@ -17,6 +17,10 @@ func LogFatal(s string, a ...any) {
 	os.Exit(1)
 }
 
+func LogWarn(s string, a ...any) {
+	fmt.Printf(colorRed+s+colorReset+"\n", a...)
+}
+
 func LogGood(s string, a ...any) {
 	fmt.Printf(colorGreen+s+colorReset+"\n", a...)
 }

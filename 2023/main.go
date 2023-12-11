@@ -4,8 +4,8 @@ import (
 	"flag"
 	"slices"
 
+	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions"
-	util "github.com/BlueAlder/advent-of-code-solutions/utils"
 )
 
 var dayNumber int
