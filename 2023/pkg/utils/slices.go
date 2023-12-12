@@ -36,3 +36,20 @@ func SliceEvery[T any](slice []T, f func(T) bool) bool {
 	}
 	return true
 }
+
+func SumIntSlice(slice []int) (total int) {
+	for _, v := range slice {
+		total += v
+	}
+	return
+}
+
+func MaxIntSlice(slice []int) int {
+	max := slice[0]
+	for _, v := range slice {
+		if v > max {
+			max = v
+		}
+	}
+	return max
+}
