@@ -70,9 +70,8 @@ func (u Universe) calculateDistancesWithExpansion(galaxies []image.Point, expans
 			return count
 		})
 
-		dist := util.Abs(g1.X-g2.X) + util.Abs(g1.Y-g2.Y) -
-			(eColsCrossed + eRowsCrossed) +
-			expansionFactor*(eColsCrossed+eRowsCrossed)
+		dist := util.Abs(g1.X-g2.X) + util.Abs(g1.Y-g2.Y) +
+			(expansionFactor-1)*(eColsCrossed+eRowsCrossed)
 		distances = append(distances, dist)
 	}
 

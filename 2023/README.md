@@ -8,3 +8,7 @@ solve them all in go, to upskill myself in golang
 To run a particular day use:
 
 `go run main.go -d <challenge_number> -p <part>`
+
+To run all solutions use:
+
+`go run main.go --runall`
