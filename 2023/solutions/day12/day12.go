@@ -3,13 +3,12 @@ package day12
 
 import (
 	_ "embed"
-	"reflect"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
-	"gonum.org/v1/gonum/stat/combin"
 )
 
 //go:embed input.txt
@@ -26,10 +25,8 @@ func Solve(part int) int {
 	}
 }
 
-type Condition string
-
 type SpringRecord struct {
-	condition Condition
+	condition string
 	groups    []int
 }
 
@@ -41,55 +38,65 @@ func part1(inputData string) int {
 		parts := strings.Split(s, " ")
 		digitStrings, _ := util.MapSliceWithError(reDig.FindAllString(parts[1], -1), strconv.Atoi)
 		return SpringRecord{
-			condition: Condition(parts[0]),
+			condition: parts[0],
 			groups:    digitStrings,
 		}
 	})
 
 	total := 0
 	for _, row := range rs {
-		total += row.calculateArrangements()
+		test := strings.FieldsFunc(row.condition, func(r rune) bool { return r == '.' })
+		fmt.Println(len(test))
+
+		total += calculateArrangements(row.condition, row.groups)
 	}
 
 	return total
 }
 
-var reQuestion = regexp.MustCompile(`\?`)
+// var reQuestion = regexp.MustCompile(`\?`)
 
-func (sr SpringRecord) calculateArrangements() (total int) {
-	unusedRe := reQuestion.FindAllStringIndex(string(sr.condition), -1)
-	unused := util.MapSlice(unusedRe, func(el []int) int { return el[0] })
-
-	currentGrouping := sr.condition.getGroupings()
-	toPlace := util.SumIntSlice(sr.groups) - util.SumIntSlice(currentGrouping)
-
-	combinations := combin.Combinations(len(unused), toPlace)
-	for _, idxs := range combinations {
-		newString := sr.condition
-		for _, idx := range idxs {
-			newString = newString[:unused[idx]] + "#" + newString[unused[idx]+1:]
-		}
-		newGrouping := newString.getGroupings()
-		if reflect.DeepEqual(newGrouping, sr.groups) {
-			total++
-		}
+func calculateArrangements(groups []string, groupCounts []int) (total int) {
+	// unusedRe := reQuestion.FindAllStringIndex(string(sr.condition), -1)
+	// unused := util.MapSlice(unusedRe, func(el []int) int { return el[0] })
+	if len(groups) == 0 && len(groupCounts) == 0 {
+		return 1
+	} else if len(groups) == 0 || len(groupCounts) == 0 {
+		return 0
 	}
-	return total
+
+	firstGroup := groups[0]
+	switch firstGroup[0] {
+	case '.':
+
+		total += calculateArrangements(line[1:], groupCounts)
+	case '#':
+		groupLen := groupCounts[0]
+		if len(line) < groupLen {
+			return 0
+		}
+		firstGroup := line[:groupCounts[0]]
+		firstAfter := line[groupCounts[0]]
+		if !strings.Contains(firstGroup, ".") && firstAfter != '#' {
+			newString := line[len(firstGroup)+1:]
+			total += calculateArrangements(newString, groupCounts[1:])
+		}
+	case '?':
+		withHash := "#" + line[1:]
+		withDot := "." + line[1:]
+		total += calculateArrangements(withHash, groupCounts)
+		total += calculateArrangements(withDot, groupCounts)
+	}
+	return
 }
 
-func (sr SpringRecord) isPossible() bool {
+// var reHashes = regexp.MustCompile("#+")
 
-	groups := sr.condition.getGroupings()
-	return util.MaxIntSlice(sr.groups) >= util.MaxIntSlice(groups)
-}
-
-var reHashes = regexp.MustCompile("#+")
-
-func (c Condition) getGroupings() []int {
-	return util.MapSlice(reHashes.FindAllString(string(c), -1), func(el string) int {
-		return len(el)
-	})
-}
+// func (c Condition) getGroupings() []int {
+// 	return util.MapSlice(reHashes.FindAllString(string(c), -1), func(el string) int {
+// 		return len(el)
+// 	})
+// }
 
 func part2(inputData string) int {
 	return 0
