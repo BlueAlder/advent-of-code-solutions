@@ -31,7 +31,7 @@ func part1(inputData string) int {
 }
 
 func part2(inputData string) int {
-	return findDistancesWithExpansionFactor(inputData, 1000000)
+	return findDistancesWithExpansionFactor(inputData, 1_000_000)
 }
 
 func findDistancesWithExpansionFactor(inputData string, expansionFactor int) int {
