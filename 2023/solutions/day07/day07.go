@@ -62,11 +62,11 @@ func calculateTotal(inputData string, cardValues []rune, joker bool) int {
 func (h1 Hand) beats(h2 Hand, cardValues []rune, joker bool) bool {
 	var val1, val2 int
 	if joker {
-		val1 = getHandValueWithJoker(h1, cardValues)
-		val2 = getHandValueWithJoker(h2, cardValues)
+		val1 = getHandValue(h1, true)
+		val2 = getHandValue(h2, true)
 	} else {
-		val1 = getHandValue(h1)
-		val2 = getHandValue(h2)
+		val1 = getHandValue(h1, false)
+		val2 = getHandValue(h2, false)
 	}
 
 	if val1 == val2 {
@@ -102,22 +102,16 @@ const (
 	Five_of_a_Kind  int = iota
 )
 
-func getHandValueWithJoker(h Hand, cardValues []rune) (max int) {
-	for _, v := range cardValues {
-		tmp := strings.Replace(string(h), "J", string(v), -1)
-		val := getHandValue(Hand(tmp))
-		if val > max {
-			max = val
-		}
-	}
-	return
-}
-
-func getHandValue(h Hand) int {
+func getHandValue(h Hand, wildcardJoker bool) int {
 	vals := make(map[rune]int)
 	for _, card := range h {
 		vals[card]++
 	}
+	jokers := vals['J']
+	if !wildcardJoker {
+		jokers = 0
+	}
+
 	var count []int
 	for _, v := range vals {
 		count = append(count, v)
@@ -129,18 +123,27 @@ func getHandValue(h Hand) int {
 	case 5:
 		return Five_of_a_Kind
 	case 4:
-		return Four_of_a_Kind
+		return util.Min(Four_of_a_Kind+jokers, Five_of_a_Kind)
 	case 3:
 		if count[1] == 2 {
-			return Full_House
+			return util.Min(Full_House+jokers, Five_of_a_Kind)
+		}
+		if jokers > 0 {
+			return Four_of_a_Kind
 		}
 		return Three_of_a_kind
 	case 2:
 		if count[1] == 2 {
+			if jokers > 0 {
+				return Two_Pair + jokers + 1
+			}
 			return Two_Pair
+		}
+		if jokers > 0 {
+			return Three_of_a_kind
 		}
 		return One_Pair
 	default:
-		return High_Card
+		return High_Card + jokers
 	}
 }
