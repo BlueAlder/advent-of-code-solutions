@@ -26,8 +26,8 @@ func Solve(part int) int {
 }
 
 type SpringRecord struct {
-	condition string
-	groups    []int
+	line        string
+	groupCounts []int
 }
 
 func part1(inputData string) int {
@@ -38,58 +38,98 @@ func part1(inputData string) int {
 		parts := strings.Split(s, " ")
 		digitStrings, _ := util.MapSliceWithError(reDig.FindAllString(parts[1], -1), strconv.Atoi)
 		return SpringRecord{
-			condition: parts[0],
-			groups:    digitStrings,
+			line:        parts[0] + ".",
+			groupCounts: digitStrings,
 		}
 	})
 
 	total := 0
 	for _, row := range rs {
-		test := strings.FieldsFunc(row.condition, func(r rune) bool { return r == '.' })
-		fmt.Println(len(test))
-
-		// total += calculateArrangements(row.condition, row.groups)
+		total += calculateArrangements(row.line, row.groupCounts)
 	}
 
 	return total
 }
 
-// var reQuestion = regexp.MustCompile(`\?`)
+func part2(inputData string) int {
+	lines := strings.Split(inputData, "\n")
+	reDig := regexp.MustCompile(`\d+`)
 
-func calculateArrangements(groups []string, groupCounts []int) (total int) {
-	// unusedRe := reQuestion.FindAllStringIndex(string(sr.condition), -1)
-	// unused := util.MapSlice(unusedRe, func(el []int) int { return el[0] })
-	if len(groups) == 0 && len(groupCounts) == 0 {
-		return 1
-	} else if len(groups) == 0 || len(groupCounts) == 0 {
-		return 0
+	rs := util.MapSlice(lines, func(s string) SpringRecord {
+		parts := strings.Split(s, " ")
+		digitsRepeated := repeatStringSeperated(parts[1], ",", 5)
+		groupCounts, _ := util.MapSliceWithError(reDig.FindAllString(digitsRepeated, -1), strconv.Atoi)
+		return SpringRecord{
+			line:        repeatStringSeperated(parts[0], "?", 5) + ".",
+			groupCounts: groupCounts,
+		}
+	})
+
+	total := 0
+
+	for _, row := range rs {
+		total += calculateArrangements(row.line, row.groupCounts)
 	}
 
-	// firstGroup := groups[0]
-	// switch firstGroup[0] {
-	// case '.':
-
-	// 	total += calculateArrangements(line[1:], groupCounts)
-	// case '#':
-	// 	groupLen := groupCounts[0]
-	// 	if len(line) < groupLen {
-	// 		return 0
-	// 	}
-	// 	firstGroup := line[:groupCounts[0]]
-	// 	firstAfter := line[groupCounts[0]]
-	// 	if !strings.Contains(firstGroup, ".") && firstAfter != '#' {
-	// 		newString := line[len(firstGroup)+1:]
-	// 		total += calculateArrangements(newString, groupCounts[1:])
-	// 	}
-	// case '?':
-	// 	withHash := "#" + line[1:]
-	// 	withDot := "." + line[1:]
-	// 	total += calculateArrangements(withHash, groupCounts)
-	// 	total += calculateArrangements(withDot, groupCounts)
-	// }
-	return
+	return total
 }
 
-func part2(inputData string) int {
-	return 0
+func repeatStringSeperated(s string, seperator string, num int) string {
+	sSlice := make([]string, num)
+	for i := range sSlice {
+		sSlice[i] = s
+	}
+	return strings.Join(sSlice, seperator)
+}
+
+var cache = make(map[string]int)
+
+func calculateArrangements(line string, groupCounts []int) (total int) {
+	cacheKey := line + fmt.Sprint(groupCounts)
+	if v, ok := cache[cacheKey]; ok {
+		return v
+	}
+	calcArrange := func(line string, groupCounts []int) (total int) {
+		if line == "" {
+			if len(groupCounts) > 0 {
+				return 0
+			}
+			return 1
+		}
+
+		if len(groupCounts) == 0 {
+			if strings.Contains(line, "#") {
+				return 0
+			}
+		}
+
+		switch line[0] {
+		case '.':
+			total += calculateArrangements(line[1:], groupCounts)
+		case '#':
+			nextGroup := groupCounts[0]
+			if nextGroup >= len(line) {
+				return 0
+			}
+			firstGroup := line[:nextGroup]
+			firstAfter := line[nextGroup]
+			if !strings.Contains(firstGroup, ".") && firstAfter != '#' {
+				newString := line[len(firstGroup)+1:]
+				total += calculateArrangements(newString, groupCounts[1:])
+			} else {
+				return 0
+			}
+		case '?':
+			withDot := "." + line[1:]
+			total += calculateArrangements(withDot, groupCounts)
+			if len(groupCounts) > 0 {
+				withHash := "#" + line[1:]
+				total += calculateArrangements(withHash, groupCounts)
+			}
+		}
+		return
+	}
+	res := calcArrange(line, groupCounts)
+	cache[cacheKey] = res
+	return res
 }
