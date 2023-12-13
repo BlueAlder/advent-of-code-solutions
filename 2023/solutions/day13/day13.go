@@ -53,18 +53,18 @@ func summarizeReflection(inputData string, smudge bool) (total int) {
 
 func findReflection(grid []string, smudge bool) int {
 	for rIdx := 1; rIdx < len(grid); rIdx++ {
-		gridCopy := make([]string, len(grid))
-		copy(gridCopy, grid)
-		left := gridCopy[:rIdx]
-		right := gridCopy[rIdx:]
+		left := grid[:rIdx]
+		right := grid[rIdx:]
 		min := util.Min(len(left), len(right))
 
 		left = left[len(left)-min:]
 		right = right[:min]
-		slices.Reverse(right)
+		rightCopy := make([]string, len(right))
+		copy(rightCopy, right)
+		slices.Reverse(rightCopy)
 
 		leftStr := strings.Join(left, "")
-		rightStr := strings.Join(right, "")
+		rightStr := strings.Join(rightCopy, "")
 
 		if (smudge && util.HammingDistanceString(leftStr, rightStr) == 1) || (!smudge && leftStr == rightStr) {
 			return rIdx

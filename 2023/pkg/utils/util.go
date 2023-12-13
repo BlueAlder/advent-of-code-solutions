@@ -17,7 +17,6 @@ func OpenFile(filename string) (*os.File, error) {
 func ReverseString(input string) (result string) {
 	for _, v := range input {
 		result = string(v) + result
-
 	}
 	return
 }
