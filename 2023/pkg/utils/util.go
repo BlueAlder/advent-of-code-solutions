@@ -2,7 +2,6 @@ package util
 
 import (
 	"fmt"
-	"math"
 	"os"
 )
 
@@ -27,6 +26,14 @@ func IsAsciiNumber[K rune | byte](c K) bool {
 	return c >= 48 && c <= 57
 }
 
-func PowInt(x, y int) int {
-	return int(math.Pow(float64(x), float64(y)))
+func HammingDistanceString(s1 string, s2 string) (distance int) {
+	if len(s1) != len(s2) {
+		return -1
+	}
+	for i := 0; i < len(s1); i++ {
+		if s1[i] != s2[i] {
+			distance++
+		}
+	}
+	return
 }

@@ -48,7 +48,7 @@ func part1(inputData string) int {
 		test := strings.FieldsFunc(row.condition, func(r rune) bool { return r == '.' })
 		fmt.Println(len(test))
 
-		total += calculateArrangements(row.condition, row.groups)
+		// total += calculateArrangements(row.condition, row.groups)
 	}
 
 	return total
@@ -65,38 +65,30 @@ func calculateArrangements(groups []string, groupCounts []int) (total int) {
 		return 0
 	}
 
-	firstGroup := groups[0]
-	switch firstGroup[0] {
-	case '.':
+	// firstGroup := groups[0]
+	// switch firstGroup[0] {
+	// case '.':
 
-		total += calculateArrangements(line[1:], groupCounts)
-	case '#':
-		groupLen := groupCounts[0]
-		if len(line) < groupLen {
-			return 0
-		}
-		firstGroup := line[:groupCounts[0]]
-		firstAfter := line[groupCounts[0]]
-		if !strings.Contains(firstGroup, ".") && firstAfter != '#' {
-			newString := line[len(firstGroup)+1:]
-			total += calculateArrangements(newString, groupCounts[1:])
-		}
-	case '?':
-		withHash := "#" + line[1:]
-		withDot := "." + line[1:]
-		total += calculateArrangements(withHash, groupCounts)
-		total += calculateArrangements(withDot, groupCounts)
-	}
+	// 	total += calculateArrangements(line[1:], groupCounts)
+	// case '#':
+	// 	groupLen := groupCounts[0]
+	// 	if len(line) < groupLen {
+	// 		return 0
+	// 	}
+	// 	firstGroup := line[:groupCounts[0]]
+	// 	firstAfter := line[groupCounts[0]]
+	// 	if !strings.Contains(firstGroup, ".") && firstAfter != '#' {
+	// 		newString := line[len(firstGroup)+1:]
+	// 		total += calculateArrangements(newString, groupCounts[1:])
+	// 	}
+	// case '?':
+	// 	withHash := "#" + line[1:]
+	// 	withDot := "." + line[1:]
+	// 	total += calculateArrangements(withHash, groupCounts)
+	// 	total += calculateArrangements(withDot, groupCounts)
+	// }
 	return
 }
-
-// var reHashes = regexp.MustCompile("#+")
-
-// func (c Condition) getGroupings() []int {
-// 	return util.MapSlice(reHashes.FindAllString(string(c), -1), func(el string) int {
-// 		return len(el)
-// 	})
-// }
 
 func part2(inputData string) int {
 	return 0

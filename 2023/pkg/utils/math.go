@@ -1,5 +1,7 @@
 package util
 
+import "math"
+
 func GCD(a, b int) int {
 	for b != 0 {
 		temp := b
@@ -44,4 +46,8 @@ func Min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func PowInt(x, y int) int {
+	return int(math.Pow(float64(x), float64(y)))
 }
