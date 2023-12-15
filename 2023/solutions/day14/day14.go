@@ -45,7 +45,6 @@ func part2(inputData string) int {
 	seen := make(map[string]int)
 	seen[(grid.ToString())] = 0
 	offset, length := grid.getCycleOffsetAndLength()
-	// grid.print()+
 	numCycles := 1_000_000_000
 	remaining := (numCycles - offset) % length
 	grid.cycle(remaining)
