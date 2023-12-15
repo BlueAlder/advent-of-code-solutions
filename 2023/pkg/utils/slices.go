@@ -37,6 +37,16 @@ func SliceEvery[T any](slice []T, f func(T) bool) bool {
 	return true
 }
 
+func SliceFilter[T any](s []T, f func(T) bool) []T {
+	var filtered []T
+	for _, el := range s {
+		if f(el) {
+			filtered = append(filtered, el)
+		}
+	}
+	return filtered
+}
+
 func SumIntSlice(slice []int) (total int) {
 	for _, v := range slice {
 		total += v
