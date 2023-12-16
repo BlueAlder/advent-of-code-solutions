@@ -34,8 +34,6 @@ const (
 func part1(inputData string) int {
 	grid := parseInput(inputData)
 	grid.tiltNorth()
-	grid.print()
-
 	return grid.calculateLoad()
 }
 
