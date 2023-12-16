@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"image"
 	"strings"
+	"sync"
 
 	"github.com/BlueAlder/advent-of-code-solutions/pkg/sets"
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
@@ -88,45 +89,68 @@ func part2(inputData string) int {
 }
 func calculateActivated(rows []string, initRay *Ray) int {
 
-	var rays []*Ray
-	rays = append(rays, initRay)
-
+	seenMutex := &sync.RWMutex{}
 	seen := make(sets.Set[Ray])
-	visted := make(sets.Set[image.Point])
 
-	for len(rays) > 0 {
-		// pop ray off queue
-		r := rays[0]
-		rays = rays[1:]
+	vistedChan := make(chan image.Point)
+	var visted []image.Point
 
-		r.Move()
-		if isInBounds(r, len(rows[0]), len(rows)) && !seen.Has(*r) {
-			rays = append(rays, r)
-			seen.Add(*r)
-			visted.Add(image.Point{X: r.X, Y: r.Y})
-			block := rows[r.Y][r.X]
+	var wg sync.WaitGroup
+	var followRay func(*Ray)
+	followRay = func(r *Ray) {
+		defer wg.Done()
 
-			if block == '|' && r.dy == 0 {
-				r.dx = 0
-				r.dy = 1
-				newR := *r
-				newR.dy = -r.dy
-				rays = append(rays, &newR)
-			} else if block == '-' && r.dx == 0 {
-				r.dy = 0
-				r.dx = 1
-				newR := *r
-				newR.dx = -r.dx
-				rays = append(rays, &newR)
-			} else if block == '/' {
-				r.dx, r.dy = -r.dy, -r.dx
-			} else if block == '\\' {
-				r.dx, r.dy = r.dy, r.dx
+		for {
+			r.Move()
+			seenMutex.RLock()
+			notSeen := !seen.Has(*r)
+			seenMutex.RUnlock()
+
+			if isInBounds(r, len(rows[0]), len(rows)) && notSeen {
+				seenMutex.Lock()
+				seen.Add(*r)
+				seenMutex.Unlock()
+
+				vistedChan <- image.Point{X: r.X, Y: r.Y}
+
+				block := rows[r.Y][r.X]
+				if block == '|' && r.dy == 0 {
+					r.dx = 0
+					r.dy = 1
+					newR := *r
+					newR.dy = -r.dy
+					wg.Add(1)
+
+					go followRay(&newR)
+				} else if block == '-' && r.dx == 0 {
+					r.dy = 0
+					r.dx = 1
+					newR := *r
+					newR.dx = -r.dx
+					wg.Add(1)
+
+					go followRay(&newR)
+				} else if block == '/' {
+					r.dx, r.dy = -r.dy, -r.dx
+				} else if block == '\\' {
+					r.dx, r.dy = r.dy, r.dx
+				}
+			} else {
+				return
 			}
 		}
 
 	}
+	wg.Add(1)
 
+	go followRay(initRay)
+	go func() {
+		wg.Wait()
+		close(vistedChan)
+	}()
+
+	for p := range vistedChan {
+		visted = append(visted, p)
+	}
 	return len(visted)
-
 }
