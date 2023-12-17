@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"image"
 	"strings"
+	"sync"
 
 	"github.com/BlueAlder/advent-of-code-solutions/pkg/sets"
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
@@ -49,6 +50,14 @@ func part1(inputData string) int {
 func part2(inputData string) int {
 	rows := strings.Split(inputData, "\n")
 	max := 0
+	var wg sync.WaitGroup
+	activatedChan := make(chan int, 100)
+
+	goCalculateActivated := func(r1 *Ray) {
+		defer wg.Done()
+		activatedChan <- calculateActivated(rows, r1)
+	}
+
 	for y := range rows {
 		r1 := &Ray{
 			X:  -1,
@@ -62,9 +71,9 @@ func part2(inputData string) int {
 			dx: -1,
 			dy: 0,
 		}
-		r1m := calculateActivated(rows, r1)
-		r2m := calculateActivated(rows, r2)
-		max = util.Max(util.Max(max, r2m), r1m)
+		wg.Add(2)
+		go goCalculateActivated(r1)
+		go goCalculateActivated(r2)
 	}
 
 	for x := range rows[0] {
@@ -80,10 +89,23 @@ func part2(inputData string) int {
 			dx: 0,
 			dy: -1,
 		}
-		r1m := calculateActivated(rows, r1)
-		r2m := calculateActivated(rows, r2)
-		max = util.Max(util.Max(max, r2m), r1m)
+		wg.Add(2)
+		go goCalculateActivated(r1)
+		go goCalculateActivated(r2)
 	}
+
+	go func() {
+		wg.Wait()
+		close(activatedChan)
+	}()
+
+	for val := range activatedChan {
+		if val > max {
+			max = val
+		}
+	}
+
+	// for
 	return max
 }
 func calculateActivated(rows []string, initRay *Ray) int {
