@@ -3,13 +3,10 @@ package day18
 
 import (
 	_ "embed"
-	"fmt"
 	"image"
-	"math"
 	"strconv"
 	"strings"
 
-	"github.com/BlueAlder/advent-of-code-solutions/pkg/sets"
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 )
 
@@ -42,10 +39,9 @@ var direction = map[string]Direction{
 func part1(inputData string) int {
 	lines := strings.Split(inputData, "\n")
 
-	dug := make(sets.Set[image.Point])
+	dug := 0
 	var vertices []image.Point
 	curr := image.Point{X: 0, Y: 0}
-	dug.Add(curr)
 	for _, line := range lines {
 		parts := strings.Split(line, " ")
 		dir := direction[parts[0]]
@@ -53,102 +49,54 @@ func part1(inputData string) int {
 		for i := 0; i < num; i++ {
 			curr.X += dir.dx
 			curr.Y += dir.dy
-			dug.Add(curr)
+			dug++
 		}
 		vertices = append(vertices, curr)
 	}
-	fmt.Println(len(dug))
-	// fmt.Println(vertices)
-	// area := shoelaceTheorem(vertices)
-	area := 0
-	area = floodFill(dug, image.Point{X: 1, Y: 1})
-	// mnX, mxX, mnY, mxY := findBounds(dug)
+	s := shoelaceTheorem(vertices)
+	i := s + (dug / 2) + 1
 
-	// for y := mnY; y <= mxY; y++ {
-	// 	inside := false
-	// 	line := ""
-	// 	for x := mnX; x <= mxX; x++ {
-	// 		if dug.Has(image.Point{X: x, Y: y}) {
-	// 			inside = !inside
-	// 			line += "#"
-	// 		} else if inside {
-	// 			area += 1
-	// 			line += "#"
-	// 		} else {
-	// 			line += "."
-
-	// 		}
-	// 	}
-	// 	fmt.Println(line)
-	// }
-
-	return area + len(dug)
+	return i
 }
 
 func part2(inputData string) int {
-	return 0
-}
+	lines := strings.Split(inputData, "\n")
 
-func floodFill(dug sets.Set[image.Point], start image.Point) (area int) {
-	var queue []image.Point
-	queue = append(queue, start)
-	visted := make(sets.Set[image.Point])
-	var inside []image.Point
-	dirs := [][2]int{
-		{0, 1},
-		{0, -1},
-		{1, 0},
-		{-1, 0},
+	dirLookup := map[string]string{
+		"0": "R",
+		"1": "D",
+		"2": "L",
+		"3": "U",
 	}
 
-	for len(queue) > 0 {
-		n := queue[0]
-		queue = queue[1:]
-		if !dug.Has(n) && !visted.Has(n) {
-			inside = append(inside, n)
-			visted.Add(n)
-
-			area += 1
-			for _, dir := range dirs {
-				p := image.Point{X: n.X + dir[0], Y: n.Y + dir[1]}
-				if !(visted.Has(p) || dug.Has(p)) {
-					queue = append(queue, p)
-				}
-			}
-		}
+	dug := 0
+	var vertices []image.Point
+	curr := image.Point{X: 0, Y: 0}
+	for _, line := range lines {
+		parts := strings.Split(line, " ")
+		dir := direction[dirLookup[string(parts[2][len(parts[2])-2])]]
+		num, _ := strconv.ParseInt(parts[2][2:len(parts[2])-2], 16, 0)
+		curr.X += dir.dx * int(num)
+		curr.Y += dir.dy * int(num)
+		vertices = append(vertices, curr)
+		dug += int(num)
 	}
-	fmt.Println(inside)
-	return
+
+	s := shoelaceTheorem(vertices)
+	// Picks theorem https://en.wikipedia.org/wiki/Pick%27s_theorem
+	i := s + (dug / 2) + 1
+	return i
 }
 
 func shoelaceTheorem(verts []image.Point) int {
-	a1 := 0
-	a2 := 0
+	a := 0
 	for i := 0; i < len(verts); i++ {
-		fmt.Println(verts[i].X * verts[(i+1)%(len(verts))].Y)
-		a1 += verts[i].X * verts[(i+1)%(len(verts))].Y
-		a2 += verts[i].Y * verts[(i+1)%(len(verts))].X
+		a += verts[i].X * (verts[mod(i+1, len(verts))].Y - verts[mod(i-1, len(verts))].Y)
 	}
-	return util.Abs(a1-a2) / 2
+	res := a / 2
+	return res
 }
 
-func findBounds(dug sets.Set[image.Point]) (minX, maxX, minY, maxY int) {
-	minX, minY = math.MaxInt, math.MaxInt
-	maxX, maxY = -math.MaxInt, -math.MaxInt
-
-	for v := range dug {
-		if v.X < minX {
-			minX = v.X
-		}
-		if v.X > maxX {
-			maxX = v.X
-		}
-		if v.Y < minY {
-			minY = v.Y
-		}
-		if v.Y > maxY {
-			maxY = v.Y
-		}
-	}
-	return
+func mod(a, b int) int {
+	return (a%b + b) % b
 }
