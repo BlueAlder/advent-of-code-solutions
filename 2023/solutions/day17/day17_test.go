@@ -26,7 +26,21 @@ func TestPart1(t *testing.T) {
 
 func TestPart2(t *testing.T) {
 	answer := part2(exampleInput)
-	solution := -1
+	solution := 94
+	if answer != solution {
+		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
+	}
+}
+
+const exampleInput2 string = `111111111111
+999999999991
+999999999991
+999999999991
+999999999991`
+
+func TestPart2b(t *testing.T) {
+	answer := part2(exampleInput2)
+	solution := 71
 	if answer != solution {
 		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
 	}

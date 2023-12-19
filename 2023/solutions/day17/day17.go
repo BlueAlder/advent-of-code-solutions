@@ -4,7 +4,9 @@ package day17
 import (
 	"container/heap"
 	_ "embed"
+	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -36,33 +38,6 @@ type Node struct {
 
 type Graph []string
 
-type PriorityQueue []Node
-
-func (pq PriorityQueue) Len() int { return len(pq) }
-
-func (pq PriorityQueue) Less(i, j int) bool {
-	d1 := distances.Get(pq[i])
-	d2 := distances.Get(pq[j])
-	return d1 < d2
-}
-
-func (pq PriorityQueue) Swap(i, j int) { pq[i], pq[j] = pq[j], pq[i] }
-
-func (pq *PriorityQueue) Push(x interface{}) {
-	item := x.(Node)
-	*pq = append(*pq, item)
-	// heap.Fix(pq, len(*pq)-1)
-}
-func (pq *PriorityQueue) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	x := old[n-1]
-	// old[n-1] = nil
-	*pq = old[:n-1]
-	// heap.Fix(pq, 0)
-	return x
-}
-
 type direction struct {
 	dx int
 	dy int
@@ -79,31 +54,42 @@ var distances = defaultdict.NewDefaultDict[Node, int](math.MaxInt)
 
 func part1(inputData string) int {
 	var g Graph = strings.Split(inputData, "\n")
-	startNode := Node{
+	return g.dijkstra(g.getNextNodes, 0)
+}
+
+func part2(inputData string) int {
+	var g Graph = strings.Split(inputData, "\n")
+	return g.dijkstra(g.getNextNodesMinMax, 4)
+}
+
+func (g Graph) dijkstra(neighbourFn func(Node) []Node, minDist int) int {
+	startNodeUp := Node{
 		x:           0,
 		y:           0,
-		direction:   -1,
+		direction:   0,
+		consecutive: 0,
+	}
+	startNodeDown := Node{
+		x:           0,
+		y:           0,
+		direction:   1,
 		consecutive: 0,
 	}
 
-	distances.Add(startNode, 0)
+	distances.Add(startNodeUp, 0)
+	distances.Add(startNodeDown, 0)
 
 	visited := make(sets.Set[Node])
-	// paths := make(map[Node][]Node)
 	via := make(map[Node]Node)
 
-	// paths[startNode] = append(paths[startNode], startNode)
-
 	q := make(PriorityQueue, 0)
-	heap.Push(&q, startNode)
-	// q = append(q, startNode)
+	heap.Push(&q, startNodeUp)
+	heap.Push(&q, startNodeDown)
 
 	for len(q) > 0 {
-		// n := q[0]
-		// q = q[1:]
 		n := heap.Pop(&q).(Node)
 		visited.Add(n)
-		neighbours := g.getNextNodes(n)
+		neighbours := neighbourFn(n)
 
 		for _, neigh := range neighbours {
 			if !visited.Has(neigh) && distances.Get(neigh) > distances.Get(n)+g.getHeat(neigh) {
@@ -117,35 +103,38 @@ func part1(inputData string) int {
 	min := math.MaxInt
 	var n Node
 	for k, v := range distances.Values() {
-		if k.y == len(g)-1 && k.x == len(g[0])-1 && v < min {
+		if k.y == len(g)-1 && k.x == len(g[0])-1 && k.consecutive >= minDist && v < min {
 			min = v
 			n = k
 		}
 	}
 
-	var shortestPath []Node
+	var path []Node
+	path = append(path, n)
 	for {
-		shortestPath = append(shortestPath, n)
 		var ok bool
 		n, ok = via[n]
 		if !ok {
 			break
 		}
+		path = append(path, n)
 	}
-
-	// for y, row := range g {
-	// 	line := ""
-	// 	for x := range row {
-	// 		if slices.ContainsFunc(shortestPath, func(n Node) bool { return n.x == x && n.y == y }) {
-	// 			line += "#"
-	// 		} else {
-	// 			line += "."
-	// 		}
-	// 	}
-	// 	fmt.Println(line)
-	// }
-
+	g.printPath(path)
 	return min
+}
+
+func (g Graph) printPath(path []Node) {
+	for y, row := range g {
+		line := ""
+		for x := range row {
+			if slices.ContainsFunc(path, func(n Node) bool { return n.x == x && n.y == y }) {
+				line += "#"
+			} else {
+				line += "."
+			}
+		}
+		fmt.Println(line)
+	}
 }
 
 func (g Graph) getNextNodes(n Node) []Node {
@@ -170,6 +159,36 @@ func (g Graph) getNextNodes(n Node) []Node {
 	return ns
 }
 
+func (g Graph) getNextNodesMinMax(n Node) []Node {
+	ns := make([]Node, 0)
+	if n.consecutive < 4 {
+		dir := dirs[n.direction]
+		nn := Node{x: n.x + dir.dx, y: n.y + dir.dy, direction: n.direction, consecutive: n.consecutive + 1}
+		if g.isInBounds(nn) {
+			return append(ns, nn)
+		}
+		return ns
+	}
+	for i, dir := range dirs {
+		// Can't go backwards
+		if (i+2)%len(dirs) == n.direction {
+			continue
+		}
+		nn := Node{x: n.x + dir.dx, y: n.y + dir.dy, direction: i, consecutive: 1}
+		if !g.isInBounds(nn) {
+			continue
+		}
+		if n.direction == i {
+			nn.consecutive = n.consecutive + 1
+			if nn.consecutive > 10 {
+				continue
+			}
+		}
+		ns = append(ns, nn)
+	}
+	return ns
+}
+
 func (g Graph) getHeat(n Node) int {
 	num, err := strconv.Atoi(string(g[n.y][n.x]))
 	if err != nil {
@@ -179,9 +198,5 @@ func (g Graph) getHeat(n Node) int {
 }
 
 func (g Graph) isInBounds(n Node) bool {
-	return n.x >= 0 && n.x < len(g) && n.y >= 0 && n.y < len(g[0])
-}
-
-func part2(inputData string) int {
-	return 0
+	return n.x >= 0 && n.x < len(g[0]) && n.y >= 0 && n.y < len(g)
 }
