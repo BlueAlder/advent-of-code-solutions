@@ -21,6 +21,7 @@ import (
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day14"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day15"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day16"
+	"github.com/BlueAlder/advent-of-code-solutions/solutions/day17"
 	"github.com/BlueAlder/advent-of-code-solutions/solutions/day18"
 )
 
@@ -41,6 +42,7 @@ var slns = map[int]interface{}{
 	14: day14.Solve,
 	15: day15.Solve,
 	16: day16.Solve,
+	17: day17.Solve,
 	18: day18.Solve,
 }
 
