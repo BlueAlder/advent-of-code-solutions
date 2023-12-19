@@ -45,3 +45,17 @@ func TestPart2b(t *testing.T) {
 		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
 	}
 }
+
+const exampleInput3 string = `1111199999999999
+9999199999999999
+9999199999999999
+9999199999999999
+9999111111111111`
+
+func TestPart2c(t *testing.T) {
+	answer := part2(exampleInput3)
+	solution := 51
+	if answer != solution {
+		t.Fatalf("Example input failed. Got: %d, Want: %d", answer, solution)
+	}
+}

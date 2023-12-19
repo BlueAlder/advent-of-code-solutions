@@ -87,9 +87,16 @@ func (g Graph) dijkstra(minDist, maxDist int) int {
 	heap.Push(&q, startNodeUp)
 	heap.Push(&q, startNodeDown)
 
+	var fn Node
+
 	for len(q) > 0 {
 		n := heap.Pop(&q).(Node)
 		visited.Add(n)
+		// If we are at the destination, finish.
+		if n.y == len(g)-1 && n.x == len(g[0])-1 && n.consecutive >= minDist {
+			fn = n
+			break
+		}
 		neighbours := g.getNextNodesMinMax(n, minDist, maxDist)
 
 		for _, neigh := range neighbours {
@@ -100,13 +107,7 @@ func (g Graph) dijkstra(minDist, maxDist int) int {
 		}
 	}
 
-	min := math.MaxInt
-	for k, v := range distances.Values() {
-		if k.y == len(g)-1 && k.x == len(g[0])-1 && k.consecutive >= minDist && v < min {
-			min = v
-		}
-	}
-	return min
+	return distances.Get(fn)
 }
 
 func (g Graph) printPath(path []Node) {
