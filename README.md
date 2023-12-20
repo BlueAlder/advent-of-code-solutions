@@ -26,4 +26,5 @@ This contains my solutions to the advent of code.
 | [Day 17](https://adventofcode.com/2023/day/17) | ⭐ | ⭐ |
 | [Day 18](https://adventofcode.com/2023/day/18) | ⭐ | ⭐ |
 | [Day 19](https://adventofcode.com/2023/day/19) | ⭐ | ⭐ |
+| [Day 20](https://adventofcode.com/2023/day/20) | ⭐ | ⭐ |
 <!--- advent_readme_stars table --->
