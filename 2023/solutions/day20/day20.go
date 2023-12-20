@@ -43,89 +43,6 @@ func Solve(part int) int {
 	}
 }
 
-type ModuleData struct {
-	label        string
-	destinations []string
-}
-
-func (md ModuleData) GetDestinations() []string {
-	return md.destinations
-}
-func (md ModuleData) GetLabel() string {
-	return md.label
-}
-
-type FlipFlop struct {
-	status bool
-	ModuleData
-}
-
-type Broadcast struct {
-	ModuleData
-}
-
-func (b *Broadcast) receive(p Pulse) []Pulse {
-	pulses := make([]Pulse, len(b.destinations))
-	for i, dest := range b.destinations {
-		pulses[i] = Pulse{src: b.label, dest: dest, high: p.high}
-	}
-	return pulses
-}
-
-func (f *FlipFlop) receive(p Pulse) []Pulse {
-	pulses := make([]Pulse, 0)
-	if !p.high {
-		f.status = !f.status
-		for _, dest := range f.destinations {
-			pulses = append(pulses, Pulse{src: f.label, dest: dest, high: f.status})
-		}
-	}
-	return pulses
-}
-
-type Pulse struct {
-	src  string
-	dest string
-	high bool
-}
-
-type Conjuction struct {
-	inputLastValue map[string]bool
-	ModuleData
-	Sent
-}
-
-func (c *Conjuction) receive(p Pulse) []Pulse {
-	c.inputLastValue[p.src] = p.high
-	pulses := make([]Pulse, 0)
-
-	toSendHigh := false
-	for _, v := range c.inputLastValue {
-		if !v {
-			toSendHigh = true
-			break
-		}
-	}
-
-	for _, dest := range c.destinations {
-		pulses = append(pulses, Pulse{src: c.label, dest: dest, high: toSendHigh})
-	}
-
-	if toSendHigh {
-		c.high++
-	} else {
-		c.low++
-	}
-
-	return pulses
-}
-
-type Module interface {
-	receive(Pulse) []Pulse
-	GetDestinations() []string
-	GetLabel() string
-}
-
 func part1(inputData string) int {
 	configs := buildConfigStructure(inputData)
 	high := 0
@@ -159,10 +76,6 @@ func part1(inputData string) int {
 	return high * low
 }
 
-type Sent struct {
-	high, low int
-}
-
 func part2(inputData string) int {
 	configs := buildConfigStructure(inputData)
 	buttonPresses := 0
@@ -175,7 +88,8 @@ func part2(inputData string) int {
 		}
 	}
 
-	// Find it's sources and find when they all send a high
+	// Find it's sources and find when they all send a high since they all cycle
+	// from testing
 	sources := make(map[string]int)
 	for k := range rxSrc.inputLastValue {
 		sources[k] = 0
