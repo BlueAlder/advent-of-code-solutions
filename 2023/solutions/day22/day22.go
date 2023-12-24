@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/BlueAlder/advent-of-code-solutions/pkg/sets"
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 )
 
@@ -41,6 +42,18 @@ func (b Brick) maxZ() int {
 	return util.Max(b.start.z, b.end.z)
 }
 
+func (b Brick) getOccupiedPoints() []Point {
+	points := make([]Point, 0)
+	for x := b.start.x; x <= b.end.x; x++ {
+		for y := b.start.y; y <= b.end.y; y++ {
+			for z := b.start.z; z <= b.end.z; z++ {
+				points = append(points, Point{x, y, z})
+			}
+		}
+	}
+	return points
+}
+
 func part1(inputData string) int {
 	lines := strings.Split(inputData, "\n")
 
@@ -69,6 +82,8 @@ func part1(inputData string) int {
 		return a.minZ() - b.minZ()
 	})
 
+	brickMapping := make(map[Point]Brick)
+
 	for i, b := range bricks {
 		if b.minZ() <= 1 {
 			continue
@@ -94,11 +109,47 @@ func part1(inputData string) int {
 		}
 
 		bricks[i] = newBrick
+		occupied := newBrick.getOccupiedPoints()
+		for _, point := range occupied {
+			brickMapping[point] = newBrick
+		}
+
 	}
 
 	slices.SortStableFunc(bricks, func(a, b Brick) int {
 		return a.minZ() - b.minZ()
 	})
+	supporting := make(map[Brick]sets.Set[Brick])
+	supportedBy := make(map[Brick]sets.Set[Brick])
+
+	for _, block := range bricks {
+		supporting[block] = make(sets.Set[Brick], 0)
+		supportedBy[block] = make(sets.Set[Brick], 0)
+	}
+
+	for _, block := range bricks {
+		ps := block.getOccupiedPoints()
+		for _, p := range ps {
+			p.z++
+			if b, ok := brickMapping[p]; ok && b != block {
+				supporting[block].Add(b)
+				supportedBy[b].Add(block)
+			}
+		}
+	}
+
+	total := 0
+	for _, supported := range supporting {
+		if len(supported) == 0 {
+			total++
+			continue
+		}
+
+		if util.SliceEvery(supported.ToSlice(), func(b Brick) bool { return len(supportedBy[b]) > 1 }) {
+			total++
+		}
+
+	}
 
 	// for _, b := range bricks {
 
@@ -107,7 +158,7 @@ func part1(inputData string) int {
 	// printAxis(bricks, true)
 	// fmt.Println()
 	// printAxis(bricks, false)
-	return 0
+	return total
 }
 
 func printAxis(bricks []Brick, xAxis bool) {

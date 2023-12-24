@@ -51,3 +51,7 @@ func Min(a, b int) int {
 func PowInt(x, y int) int {
 	return int(math.Pow(float64(x), float64(y)))
 }
+
+func Mod(a, b int) int {
+	return (a%b + b) % b
+}
