@@ -3,7 +3,6 @@ package day22
 
 import (
 	_ "embed"
-	"fmt"
 	"slices"
 	"strconv"
 	"strings"
@@ -29,6 +28,13 @@ func Solve(part int) int {
 type Point struct {
 	x, y, z int
 }
+
+type Grid struct {
+	bricks       []Brick
+	brickMapping map[Point]Brick
+}
+
+type Brick2Brick map[Brick]sets.Set[Brick]
 
 type Brick struct {
 	start, end Point
@@ -66,7 +72,62 @@ func (b Brick) getPointsBelow() []Point {
 
 func part1(inputData string) int {
 	lines := strings.Split(inputData, "\n")
+	g := parseInput(lines)
+	g.LetFall()
+	supporting, supportedBy := g.findSupports()
 
+	total := 0
+	for _, supported := range supporting {
+		if len(supported) == 0 ||
+			util.SliceEvery(supported.ToSlice(), func(b Brick) bool { return len(supportedBy[b]) > 1 }) {
+
+			total++
+			continue
+		}
+
+	}
+	return total
+}
+
+func part2(inputData string) int {
+	lines := strings.Split(inputData, "\n")
+	g := parseInput(lines)
+	g.LetFall()
+
+	supporting, supportedBy := g.findSupports()
+
+	count := 0
+	for _, brick := range g.bricks {
+		falling := make(sets.Set[Brick])
+		falling.Add(brick)
+		queue := []Brick{brick}
+
+		for len(queue) > 0 {
+			b := queue[0]
+			queue = queue[1:]
+
+			supported := supporting[b]
+			if len(supported) > 0 {
+				for _, s := range supported.ToSlice() {
+					if util.SliceEvery(supportedBy[s].ToSlice(), func(sb Brick) bool { return falling.Has(sb) }) {
+						if !falling.Has(s) {
+							falling.Add(s)
+							queue = append(queue, s)
+							count++
+
+						}
+
+					}
+				}
+			}
+		}
+
+	}
+
+	return count
+}
+
+func parseInput(lines []string) Grid {
 	var bricks []Brick
 	brickMapping := make(map[Point]Brick)
 	highestZ := 0
@@ -94,12 +155,16 @@ func part1(inputData string) int {
 		return a.minZ() - b.minZ()
 	})
 
-	for i, b := range bricks {
+	return Grid{bricks, brickMapping}
+}
+
+func (g Grid) LetFall() {
+	for i, b := range g.bricks {
 		if b.minZ() <= 1 {
 			continue
 		}
 		for _, v := range b.getOccupiedPoints() {
-			delete(brickMapping, v)
+			delete(g.brickMapping, v)
 		}
 
 		newBrick := b
@@ -110,7 +175,7 @@ func part1(inputData string) int {
 
 			for _, p := range below {
 				// Hit another block
-				if _, ok := brickMapping[p]; ok {
+				if _, ok := g.brickMapping[p]; ok {
 					break FallingLoop
 				}
 			}
@@ -119,91 +184,34 @@ func part1(inputData string) int {
 			newBrick.start.z--
 		}
 		for _, v := range newBrick.getOccupiedPoints() {
-			brickMapping[v] = newBrick
+			g.brickMapping[v] = newBrick
 		}
-		bricks[i] = newBrick
-
+		g.bricks[i] = newBrick
 	}
 
-	slices.SortStableFunc(bricks, func(a, b Brick) int {
+	slices.SortStableFunc(g.bricks, func(a, b Brick) int {
 		return a.minZ() - b.minZ()
 	})
+}
 
-	supporting := make(map[Brick]sets.Set[Brick])
-	supportedBy := make(map[Brick]sets.Set[Brick])
+func (g Grid) findSupports() (supporting Brick2Brick, supportedBy Brick2Brick) {
+	supporting = make(Brick2Brick)
+	supportedBy = make(Brick2Brick)
 
-	for _, block := range bricks {
+	for _, block := range g.bricks {
 		supporting[block] = make(sets.Set[Brick], 0)
 		supportedBy[block] = make(sets.Set[Brick], 0)
 	}
 
-	for _, block := range bricks {
+	for _, block := range g.bricks {
 		ps := block.getOccupiedPoints()
 		for _, p := range ps {
 			p.z++
-			if b, ok := brickMapping[p]; ok && b != block {
+			if b, ok := g.brickMapping[p]; ok && b != block {
 				supporting[block].Add(b)
 				supportedBy[b].Add(block)
 			}
 		}
 	}
-
-	total := 0
-	for _, supported := range supporting {
-		if len(supported) == 0 {
-			total++
-			continue
-		}
-
-		if util.SliceEvery(supported.ToSlice(), func(b Brick) bool { return len(supportedBy[b]) > 1 }) {
-			total++
-		}
-
-	}
-	return total
-}
-
-func printAxis(bricks []Brick, xAxis bool) {
-	var grid [10][3]string
-	for i := range grid {
-		grid[i] = [3]string{"#", "#", "#"}
-	}
-
-	for i, b := range bricks {
-		if xAxis {
-			for x := util.Min(b.start.x, b.end.x); x <= util.Max(b.start.x, b.end.x); x++ {
-				grid[b.start.z][x] = string(rune(i + 65))
-			}
-		} else {
-			for y := util.Min(b.start.y, b.end.y); y <= util.Max(b.start.y, b.end.y); y++ {
-				grid[b.start.z][y] = string(rune(i + 65))
-			}
-		}
-
-		for z := b.maxZ(); z >= b.minZ(); z-- {
-			if xAxis {
-				grid[z][b.start.x] = string(rune(i + 65))
-			} else {
-				grid[z][b.start.y] = string(rune(i + 65))
-
-			}
-		}
-	}
-	for z := 9; z >= 0; z-- {
-		fmt.Println(grid[z][0] + grid[z][1] + grid[z][2] + " " + strconv.Itoa(z))
-	}
-}
-
-func bricksIntersect(a, b Brick) bool {
-	return true &&
-		a.start.x <= b.end.x &&
-		a.end.x >= b.start.x &&
-		a.start.y <= b.end.y &&
-		a.end.y >= b.start.y &&
-		a.start.z <= b.end.z &&
-		a.end.z >= b.start.z
-}
-
-func part2(inputData string) int {
-	return 0
+	return
 }
