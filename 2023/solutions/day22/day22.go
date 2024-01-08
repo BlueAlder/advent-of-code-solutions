@@ -54,10 +54,21 @@ func (b Brick) getOccupiedPoints() []Point {
 	return points
 }
 
+func (b Brick) getPointsBelow() []Point {
+	points := make([]Point, 0)
+	for x := b.start.x; x <= b.end.x; x++ {
+		for y := b.start.y; y <= b.end.y; y++ {
+			points = append(points, Point{x, y, b.minZ() - 1})
+		}
+	}
+	return points
+}
+
 func part1(inputData string) int {
 	lines := strings.Split(inputData, "\n")
 
 	var bricks []Brick
+	brickMapping := make(map[Point]Brick)
 	highestZ := 0
 
 	for _, line := range lines {
@@ -66,59 +77,58 @@ func part1(inputData string) int {
 		sP := Point{x: startCoords[0], y: startCoords[1], z: startCoords[2]}
 		endCoords, _ := util.MapSliceWithError(strings.Split(ends[1], ","), strconv.Atoi)
 		eP := Point{x: endCoords[0], y: endCoords[1], z: endCoords[2]}
-		bricks = append(bricks, Brick{start: sP, end: eP})
+		b := Brick{start: sP, end: eP}
+		bricks = append(bricks, b)
+
+		// Map points to grid
+		for _, p := range b.getOccupiedPoints() {
+			brickMapping[p] = b
+		}
 		if util.Max(sP.z, eP.z) > highestZ {
 			highestZ = util.Max(sP.z, eP.z)
 		}
 	}
-
-	// printAxis(bricks, true)
-	// fmt.Println()
-	// printAxis(bricks, false)
-	// fmt.Println()
 
 	// Order bricks by lowest z
 	slices.SortStableFunc(bricks, func(a, b Brick) int {
 		return a.minZ() - b.minZ()
 	})
 
-	brickMapping := make(map[Point]Brick)
-
 	for i, b := range bricks {
 		if b.minZ() <= 1 {
 			continue
 		}
+		for _, v := range b.getOccupiedPoints() {
+			delete(brickMapping, v)
+		}
+
 		newBrick := b
 
 	FallingLoop:
 		for newBrick.minZ() > 1 {
-			newBrick.end.z--
-			newBrick.start.z--
+			below := newBrick.getPointsBelow()
 
-			for _, testBrick := range bricks {
-				if testBrick.minZ() > newBrick.minZ() {
-					break
-				}
-				if bricksIntersect(testBrick, newBrick) {
-					newBrick.end.z++
-					newBrick.start.z++
+			for _, p := range below {
+				// Hit another block
+				if _, ok := brickMapping[p]; ok {
 					break FallingLoop
 				}
-
 			}
-		}
 
-		bricks[i] = newBrick
-		occupied := newBrick.getOccupiedPoints()
-		for _, point := range occupied {
-			brickMapping[point] = newBrick
+			newBrick.end.z--
+			newBrick.start.z--
 		}
+		for _, v := range newBrick.getOccupiedPoints() {
+			brickMapping[v] = newBrick
+		}
+		bricks[i] = newBrick
 
 	}
 
 	slices.SortStableFunc(bricks, func(a, b Brick) int {
 		return a.minZ() - b.minZ()
 	})
+
 	supporting := make(map[Brick]sets.Set[Brick])
 	supportedBy := make(map[Brick]sets.Set[Brick])
 
@@ -150,14 +160,6 @@ func part1(inputData string) int {
 		}
 
 	}
-
-	// for _, b := range bricks {
-
-	// }
-
-	// printAxis(bricks, true)
-	// fmt.Println()
-	// printAxis(bricks, false)
 	return total
 }
 
