@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"strings"
 
+	"github.com/BlueAlder/advent-of-code-solutions/pkg/sets"
 	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
 )
 
@@ -28,21 +29,69 @@ type Point struct {
 
 type Node struct {
 	Point
-	nextNodes []*Node
-	direction direction
+	direction   direction
+	connections []connection
 }
 
-type direction [2]int
+type connection struct {
+	distance int
+	node     *Node
+}
+
+type direction struct {
+	dx, dy int
+}
 
 type Grid struct {
-	g     []string
-	nodes []*Node
+	g []string
 }
 
 func part1(inputData string) int {
 	g := parseInput(inputData)
+	start := Point{x: 1, y: 0}
+	startNode := &Node{
+		Point:       start,
+		direction:   direction{0, 1},
+		connections: make([]connection, 0),
+	}
 
-	// startNode := Node{Point{x: 1, y: 0}}
+	vistedNodes := make(sets.Set[Point])
+	vistedNodes.Add(start)
+
+	nodeQueue := make(util.Queue[*Node], 0)
+	nodeQueue.Enqueue(startNode)
+
+	for len(nodeQueue) > 0 {
+		n, err := nodeQueue.Dequeue()
+		if err != nil {
+			panic(err)
+		}
+		vistedPoints := make(sets.Set[Point])
+		vistedPoints.Add(n.Point)
+
+		currPoint := n.Point
+
+		for {
+			next := g.getNextAvailablePoints(currPoint)
+			if len(next) == 1 {
+				if g.isSlope(next[0]) {
+					// Create new node
+					nn := &Node{
+						Point: currPoint,
+						// direction:   direction{},
+						connections: []connection{},
+					}
+
+					n.connections = append(n.connections, connection{
+						distance: len(vistedPoints),
+						node:     nn,
+					})
+				}
+			}
+
+		}
+
+	}
 
 	return 0
 }
@@ -60,28 +109,13 @@ var slopeMap = map[rune]direction{
 
 func parseInput(inputData string) Grid {
 	lines := strings.Split(inputData, "\n")
-	nodes := make([]*Node, 0)
-
-	for y, line := range lines {
-		for x, v := range line {
-			if v, ok := slopeMap[v]; ok {
-				nodes = append(nodes, &Node{
-					Point:     Point{x: x, y: y},
-					nextNodes: make([]*Node, 0),
-					direction: v,
-				})
-			}
-		}
-	}
-
 	return Grid{
-		g:     lines,
-		nodes: nodes,
+		g: lines,
 	}
 }
 
 func (g Grid) getNextAvailablePoints(p Point) []Point {
-	dirs := []struct{ dx, dy int }{
+	dirs := []direction{
 		{1, 0},
 		{0, 1},
 		{-1, 0},
@@ -95,8 +129,19 @@ func (g Grid) getNextAvailablePoints(p Point) []Point {
 		np.x += dir.dx
 		np.y += dir.dy
 
-		if g.isInBounds(np) && g.g[np.y][np.x] != '#' {
+		char := rune(g.g[np.y][np.x])
+
+		if g.isInBounds(np) && char != '#' {
+			continue
+		}
+
+		if v, ok := slopeMap[char]; ok {
+			if dir == v {
+				adjPoints = append(adjPoints, np)
+			}
+		} else {
 			adjPoints = append(adjPoints, np)
+
 		}
 	}
 	return adjPoints
@@ -104,4 +149,15 @@ func (g Grid) getNextAvailablePoints(p Point) []Point {
 
 func (g Grid) isInBounds(p Point) bool {
 	return p.x >= 0 && p.x < len(g.g[0]) && p.y >= 0 && p.y < len(g.g)
+}
+
+func (g Grid) isSlope(p Point) bool {
+	if !g.isInBounds(p) {
+		return false
+	}
+	char := rune(g.g[p.y][p.x])
+	if _, ok := slopeMap[char]; ok {
+		return true
+	}
+	return false
 }
