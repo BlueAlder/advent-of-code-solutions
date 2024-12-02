@@ -3,7 +3,10 @@ package day01
 
 import (
 	_ "embed"
-	
+	"slices"
+	"strconv"
+	"strings"
+
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
 )
 
@@ -21,11 +24,54 @@ func Solve(part int) int {
 	}
 }
 
+func parseInput(inputData string) ([]int, []int) {
+	lines := strings.Split(inputData, "\n")
+	var left []int
+	var right []int
+	for _, line := range lines {
+		numbers := strings.Fields(line)
+		l, _ := strconv.Atoi(numbers[0])
+		left = append(left, l)
+		r, _ := strconv.Atoi(numbers[1])
+		right = append(right, r)
+	}
+	return left, right
+}
+
 func part1(inputData string) int {
-	return 0
+	left, right := parseInput(inputData)
+	slices.Sort(left)
+	slices.Sort(right)
+
+	if len(left) != len(right) {
+		util.LogFatal("left and right slices are not the same length")
+	}
+
+	total := 0
+	for i := 0; i < len(left); i++ {
+		total += util.Abs(left[i] - right[i])
+	}
+
+	return total
 }
 
 func part2(inputData string) int {
-	return 0
-}
+	left, right := parseInput(inputData)
+	slices.Sort(left)
+	slices.Sort(right)
 
+	total := 0
+	for _, location := range left {
+		occurances := 0
+		for _, r := range right {
+			if location == r {
+				occurances++
+			}
+			if r > location {
+				break
+			}
+		}
+		total += location * occurances
+	}
+	return total
+}

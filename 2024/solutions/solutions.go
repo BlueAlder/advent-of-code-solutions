@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/BlueAlder/advent-of-code-solutions/2024/solutions/day01"
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
 )
 
-var slns = map[int]interface{}{}
+var slns = map[int]interface{}{
+	1: day01.Solve,
+}
 
 const TARGET_TIME = 10 * time.Millisecond
 
