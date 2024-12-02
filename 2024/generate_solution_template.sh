@@ -65,9 +65,13 @@ EOF
 cat <<EOF > ${daynum}_test.go
 package $daynum
 
-import "testing"
+import (
+	_ "embed"
+	"testing"
+)
 
-const exampleInput string = ""
+//go:embed example_input.txt
+var exampleInput string
 
 func TestPart1(t *testing.T) {
 	answer := part1(exampleInput)
@@ -88,6 +92,6 @@ func TestPart2(t *testing.T) {
 EOF
 
 
-touch input.txt
+touch input.txt example_input.txt
 
 echo "Generated files complete, make sure to update the function mapping in solutions.go"
