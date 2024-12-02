@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func OpenFile(filename string) (*os.File, error) {
@@ -35,4 +36,12 @@ func HammingDistanceString(s1 string, s2 string) (distance int) {
 		}
 	}
 	return
+}
+
+func MustAtoi(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		LogFatal("Unable to convert string to int %s", s)
+	}
+	return i
 }
