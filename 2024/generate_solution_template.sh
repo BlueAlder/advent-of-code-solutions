@@ -2,9 +2,9 @@
 
 cwd=$(basename "$PWD")
 
-if [ $cwd != "2023" ]
+if [ $cwd != "2024" ]
 then
-  echo "Please run this from the root dir for 2023"
+  echo "Please run this from the root dir for 2024"
   exit 1
 fi
 
@@ -29,7 +29,7 @@ mkdir $daynum
 cd $daynum
 
 cat <<EOF > $daynum.go
-// Solution for $daynum of the Advent of Code Challenge 2023
+// Solution for $daynum of the Advent of Code Challenge 2024
 package $daynum
 
 import (

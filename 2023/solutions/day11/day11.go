@@ -6,7 +6,7 @@ import (
 	"image"
 	"strings"
 
-	util "github.com/BlueAlder/advent-of-code-solutions/pkg/utils"
+	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
 	"gonum.org/v1/gonum/stat/combin"
 )
 

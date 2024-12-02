@@ -4,7 +4,7 @@ import (
 	"flag"
 	"slices"
 
-	"github.com/BlueAlder/advent-of-code-solutions/2023/solutions"
+	"github.com/BlueAlder/advent-of-code-solutions/2024/solutions"
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
 )
 
@@ -15,7 +15,7 @@ var runAll bool
 var parts = []int{1, 2}
 
 func main() {
-	util.LogGood("Advent of Code 2023!\n")
+	util.LogGood("Advent of Code 2024!\n")
 
 	flag.IntVar(&dayNumber, "dayNumber", -1, "the challenge number that you would like to run")
 	flag.IntVar(&dayNumber, "d", -1, "the challenge number that you would like to run")
