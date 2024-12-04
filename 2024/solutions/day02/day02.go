@@ -22,26 +22,34 @@ func Solve(part int) int {
 	}
 }
 
-func part1(inputData string) int {
+func parseInput(inputData string) [][]int {
 	reportsRaw := strings.Split(inputData, "\n")
-
-	reportsFielded := util.MapSlice(reportsRaw, func(reportRaw string) []int {
+	return util.MapSlice(reportsRaw, func(reportRaw string) []int {
 		return util.MapSlice(strings.Fields(reportRaw), func(numStr string) int {
 			return util.MustAtoi(numStr)
 		})
 	})
+}
+
+func isSafeReport(report []int) bool {
+	delta := 0
+	for i := 0; i < len(report)-1; i++ {
+		diff := (report[i] - report[i+1])
+		if util.Abs(delta+diff) > util.Abs(delta) && util.Abs(diff) < 4 {
+			delta += diff
+		} else {
+			return false
+		}
+	}
+	return true
+}
+func part1(inputData string) int {
+	reportsFielded := parseInput(inputData)
 
 	total := len(reportsFielded)
 	for _, report := range reportsFielded {
-		delta := 0
-		for i := 0; i < len(report)-1; i++ {
-			diff := (report[i] - report[i+1])
-			if util.Abs(delta+diff) > util.Abs(delta) && util.Abs(diff) < 4 {
-				delta += diff
-			} else {
-				total--
-				break
-			}
+		if !isSafeReport(report) {
+			total--
 		}
 	}
 
@@ -50,5 +58,15 @@ func part1(inputData string) int {
 }
 
 func part2(inputData string) int {
-	return 0
+	reportsFielded := parseInput(inputData)
+
+	total := len(reportsFielded)
+	for _, report := range reportsFielded {
+		if isSafeReport(report) {
+			continue
+		}
+
+	}
+
+	return total
 }
