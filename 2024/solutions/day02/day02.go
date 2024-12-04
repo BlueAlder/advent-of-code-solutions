@@ -35,7 +35,7 @@ func isSafeReport(report []int) bool {
 	delta := 0
 	for i := 0; i < len(report)-1; i++ {
 		diff := (report[i] - report[i+1])
-		if util.Abs(delta+diff) > util.Abs(delta) && util.Abs(diff) < 4 {
+		if util.Abs(delta+diff) > util.Abs(delta) && util.Abs(diff) < 4 && delta*diff >= 0 {
 			delta += diff
 		} else {
 			return false
@@ -43,6 +43,7 @@ func isSafeReport(report []int) bool {
 	}
 	return true
 }
+
 func part1(inputData string) int {
 	reportsFielded := parseInput(inputData)
 
@@ -53,20 +54,27 @@ func part1(inputData string) int {
 		}
 	}
 
-	// fmt.Print(reportsFielded)
 	return total
 }
 
 func part2(inputData string) int {
 	reportsFielded := parseInput(inputData)
 
-	total := len(reportsFielded)
+	total := 0
+
+ReportLoop:
 	for _, report := range reportsFielded {
-		if isSafeReport(report) {
-			continue
+		if !isSafeReport(report) {
+			for i := range report {
+				removedReport := util.RemoveIndex(report, i)
+				if isSafeReport(removedReport) {
+					total++
+					continue ReportLoop
+				}
+			}
+		} else {
+			total++
 		}
-
 	}
-
 	return total
 }
