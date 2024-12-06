@@ -69,3 +69,16 @@ func RemoveIndex(s []int, index int) []int {
 	ret = append(ret, s[:index]...)
 	return append(ret, s[index+1:]...)
 }
+
+func DoIntersect[T comparable](a, b []T) bool {
+	m := make(map[T]bool)
+	for _, item := range a {
+		m[item] = true
+	}
+	for _, item := range b {
+		if m[item] {
+			return true
+		}
+	}
+	return false
+}
