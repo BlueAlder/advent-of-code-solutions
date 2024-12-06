@@ -3,6 +3,7 @@ package day05
 
 import (
 	_ "embed"
+	"slices"
 	"strings"
 
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
@@ -50,33 +51,24 @@ func parseInput(input string) ([][]int, [][]int) {
 	return orderPairs, updatePages
 }
 
-type OrderMap map[int]Ordering
+type OrderMap map[int][]int
 
-type Ordering struct {
-	before []int
-	after  []int
+func buildOrderMap(ordering [][]int) OrderMap {
+	orderMap := make(OrderMap)
+	for _, order := range ordering {
+		if om, ok := orderMap[order[1]]; ok {
+			om = append(om, order[0])
+			orderMap[order[1]] = om
+		} else {
+			orderMap[order[1]] = []int{order[0]}
+		}
+	}
+	return orderMap
 }
 
 func part1(inputData string) int {
 	ordering, updates := parseInput(inputData)
-
-	orderMap := make(OrderMap)
-	for _, order := range ordering {
-		if _, ok := orderMap[order[1]]; ok {
-			om := orderMap[order[1]]
-			om.before = append(orderMap[order[1]].before, order[0])
-			orderMap[order[1]] = om
-		} else {
-			orderMap[order[1]] = Ordering{before: []int{order[0]}, after: []int{}}
-		}
-		if _, ok := orderMap[order[0]]; ok {
-			om := orderMap[order[0]]
-			om.after = append(orderMap[order[0]].after, order[1])
-			orderMap[order[0]] = om
-		} else {
-			orderMap[order[0]] = Ordering{before: []int{}, after: []int{order[1]}}
-		}
-	}
+	orderMap := buildOrderMap(ordering)
 
 	total := 0
 	for _, update := range updates {
@@ -89,15 +81,30 @@ func part1(inputData string) int {
 }
 
 func part2(inputData string) int {
-	return 0
+
+	ordering, updates := parseInput(inputData)
+	orderMap := buildOrderMap(ordering)
+
+	total := 0
+	for _, update := range updates {
+		if !orderMap.isValidUpdate(update) {
+			slices.SortFunc(update, func(a, b int) int {
+				if slices.Contains(orderMap[a], b) {
+					return -1
+				}
+				return 1
+			})
+			total += update[len(update)/2]
+		}
+	}
+	return total
 }
 
 func (o OrderMap) isValidUpdate(update []int) bool {
 	for i := range update {
-		before := update[:i]
 		after := update[i+1:]
 		if ordering, ok := o[update[i]]; ok {
-			if util.DoIntersect(before, ordering.after) || util.DoIntersect(after, ordering.before) {
+			if util.DoIntersect(after, ordering) {
 				return false
 			}
 		}
