@@ -3,6 +3,10 @@ package day09
 
 import (
 	_ "embed"
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
 
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
 )
@@ -22,8 +26,9 @@ func Solve(part int) int {
 }
 
 type block struct {
-	value int
-	empty bool
+	value  int
+	length int
+	empty  bool
 }
 
 func parseInput(input string) []block {
@@ -43,7 +48,7 @@ func parseInput(input string) []block {
 	return blocks
 }
 
-func checkSum(blocks []block) int {
+func checkSump1(blocks []block) int {
 	sum := 0
 	for i := 0; i < len(blocks); i++ {
 		if !blocks[i].empty {
@@ -74,9 +79,67 @@ func part1(inputData string) int {
 		p2--
 	}
 
-	return checkSum(blocks)
+	return checkSump1(blocks)
+}
+
+// Just to visualise what we are outputting
+func printBlocks(blocks []block) {
+	for _, b := range blocks {
+		if b.empty {
+			fmt.Print(strings.Repeat(".", b.length))
+		} else {
+			fmt.Print(strings.Repeat(strconv.Itoa(b.value), b.length))
+		}
+	}
+	fmt.Println()
 }
 
 func part2(inputData string) int {
-	return 0
+	var blocks []block
+	for i, char := range inputData {
+		count := util.MustAtoi(string(char))
+		if i%2 == 0 {
+			blocks = append(blocks, block{value: i / 2, length: count, empty: false})
+		} else {
+			blocks = append(blocks, block{value: -1, length: count, empty: true})
+		}
+	}
+	for blockIndex := len(blocks) - 1; blockIndex > 0; blockIndex-- {
+		if blocks[blockIndex].empty {
+			continue
+		}
+
+		for freeIndex := 0; freeIndex < blockIndex; freeIndex++ {
+			if !blocks[freeIndex].empty {
+				continue
+			}
+			if blocks[freeIndex].length >= blocks[blockIndex].length {
+				remainingSpace := blocks[freeIndex].length - blocks[blockIndex].length
+				blocks[freeIndex] = blocks[blockIndex]
+				blocks[blockIndex] = block{value: -1, length: blocks[blockIndex].length, empty: true}
+				if remainingSpace > 0 {
+					blocks = slices.Insert(blocks, freeIndex+1, block{value: -1, length: remainingSpace, empty: true})
+				}
+				break
+
+			}
+		}
+	}
+	return checkSumP2(blocks)
+}
+
+func checkSumP2(blocks []block) int {
+	sum := 0
+	i := 0
+	for _, block := range blocks {
+		if !block.empty {
+			for j := 0; j < block.length; j++ {
+				sum += (block.value * i)
+				i++
+			}
+		} else {
+			i += block.length
+		}
+	}
+	return sum
 }
