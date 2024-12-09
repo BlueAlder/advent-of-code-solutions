@@ -3,8 +3,8 @@ package day06
 
 import (
 	_ "embed"
-	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/BlueAlder/advent-of-code-solutions/common/sets"
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
@@ -63,20 +63,21 @@ func part2(inputData string) int {
 	visited.Remove(grid.startLocation)
 
 	total := 0
+	var wg sync.WaitGroup
 	for _, location := range visited.ToSlice() {
-		if location == 1+8i {
-			fmt.Println("hello")
-		}
-		row := grid.grid[int(imag(location))]
-		row = row[:int(real(location))] + "#" + row[int(real(location))+1:]
-		grid.grid[int(imag(location))] = row
-
-		if grid.walkGridAndFindLoop(guardDirection) {
-			total += 1
-		}
-		row = row[:int(real(location))] + "." + row[int(real(location))+1:]
-		grid.grid[int(imag(location))] = row
+		wg.Add(1)
+		go func(location complex128) {
+			defer wg.Done()
+			dupGrid := GridData{append([]string{}, grid.grid...), grid.startLocation}
+			row := dupGrid.grid[int(imag(location))]
+			row = row[:int(real(location))] + "#" + row[int(real(location))+1:]
+			dupGrid.grid[int(imag(location))] = row
+			if dupGrid.walkGridAndFindLoop(guardDirection) {
+				total += 1
+			}
+		}(location)
 	}
+	wg.Wait()
 	return total
 }
 
