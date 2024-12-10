@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"image"
 	"strings"
+	"sync"
 
 	"github.com/BlueAlder/advent-of-code-solutions/common/sets"
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
@@ -51,14 +52,32 @@ func part1(inputData string) int {
 	tm := parseInput(inputData)
 
 	sum := 0
+	var wg sync.WaitGroup
 	for _, trailhead := range tm.trailheads {
-		sum += tm.findPath(trailhead)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			sum += tm.findPath(trailhead)
+		}()
 	}
+	wg.Wait()
 	return sum
 }
 
 func part2(inputData string) int {
-	return 0
+	tm := parseInput(inputData)
+
+	sum := 0
+	var wg sync.WaitGroup
+	for _, trailhead := range tm.trailheads {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			sum += tm.findPathP2(trailhead)
+		}()
+	}
+	wg.Wait()
+	return sum
 }
 
 func (tm *topographicalMap) findPath(start image.Point) int {
@@ -82,6 +101,22 @@ func (tm *topographicalMap) findPath(start image.Point) int {
 				next = append(next, neighbor)
 			}
 		}
+	}
+	return count
+}
+
+func (tm *topographicalMap) findPathP2(start image.Point) int {
+	next := []image.Point{start}
+	count := 0
+	// Basic depth first search where the next point can only be within 1 unit of the current point
+	for len(next) > 0 {
+		current := next[len(next)-1]
+		next = next[:len(next)-1]
+		if tm.grid[current.Y][current.X] == 9 {
+			count++
+			continue
+		}
+		next = append(next, tm.getNeighbors(current)...)
 	}
 	return count
 }
