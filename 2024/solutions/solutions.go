@@ -14,6 +14,7 @@ import (
 	"github.com/BlueAlder/advent-of-code-solutions/2024/solutions/day08"
 	"github.com/BlueAlder/advent-of-code-solutions/2024/solutions/day09"
 	"github.com/BlueAlder/advent-of-code-solutions/2024/solutions/day10"
+	"github.com/BlueAlder/advent-of-code-solutions/2024/solutions/day11"
 	util "github.com/BlueAlder/advent-of-code-solutions/common/utils"
 )
 
@@ -28,6 +29,7 @@ var slns = map[int]interface{}{
 	8:  day08.Solve,
 	9:  day09.Solve,
 	10: day10.Solve,
+	11: day11.Solve,
 }
 
 const TARGET_TIME = 10 * time.Millisecond
