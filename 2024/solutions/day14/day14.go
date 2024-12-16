@@ -78,7 +78,7 @@ func part1(inputData string) int {
 		total *= v
 	}
 
-	printGrid(robots, gridWidth, gridHeight)
+	// printGrid(robots, gridWidth, gridHeight)
 	return total
 }
 
@@ -98,7 +98,7 @@ func part2(inputData string) int {
 			break
 		}
 	}
-	printGrid(robots, gridWidth, gridHeight)
+	// printGrid(robots, gridWidth, gridHeight)
 	return second
 }
 
