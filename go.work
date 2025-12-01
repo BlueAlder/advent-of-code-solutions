@@ -1,9 +1,8 @@
 go 1.23
 
-toolchain go1.23.3
-
 use (
 	./2023
 	./2024
+	./2025
 	./common
 )
